@@ -114,3 +114,111 @@ func TestGetDbMaxOpenConns(t *testing.T) {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 }
+
+func TestGetRedisHost(t *testing.T) {
+	os.Setenv("REDIS_HOST", "localhost")
+	defer os.Unsetenv("REDIS_HOST")
+
+	expected := "localhost"
+	actual := env.GetRedisHost()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetRedisPort(t *testing.T) {
+	os.Setenv("REDIS_PORT", "6379")
+	defer os.Unsetenv("REDIS_PORT")
+
+	expected := 6379
+	actual := env.GetRedisPort()
+
+	if actual != expected {
+		t.Errorf("expected %d, got %d", expected, actual)
+	}
+}
+
+func TestGetRedisPassword(t *testing.T) {
+	os.Setenv("REDIS_PASSWORD", "password")
+	defer os.Unsetenv("REDIS_PASSWORD")
+
+	expected := "password"
+	actual := env.GetRedisPassword()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetRedisDb(t *testing.T) {
+	os.Setenv("REDIS_DB", "0")
+	defer os.Unsetenv("REDIS_DB")
+
+	expected := 0
+	actual := env.GetRedisDb()
+
+	if actual != expected {
+		t.Errorf("expected %d, got %d", expected, actual)
+	}
+}
+
+func TestGetRabbitmqHost(t *testing.T) {
+	os.Setenv("RABBITMQ_HOST", "localhost")
+	defer os.Unsetenv("RABBITMQ_HOST")
+
+	expected := "localhost"
+	actual := env.GetRabbitmqHost()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetRabbitmqPort(t *testing.T) {
+	os.Setenv("RABBITMQ_PORT", "5672")
+	defer os.Unsetenv("RABBITMQ_PORT")
+
+	expected := 5672
+	actual := env.GetRabbitmqPort()
+
+	if actual != expected {
+		t.Errorf("expected %d, got %d", expected, actual)
+	}
+}
+
+func TesGetRabbitmqUser(t *testing.T) {
+	os.Setenv("RABBITMQ_USER", "guest")
+	defer os.Unsetenv("RABBITMQ_USER")
+
+	expected := "guest"
+	actual := env.GetRabbitmqUser()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetRabbitmqPassword(t *testing.T) {
+	os.Setenv("RABBITMQ_PASSWORD", "guest")
+	defer os.Unsetenv("RABBITMQ_PASSWORD")
+
+	expected := "guest"
+	actual := env.GetRabbitmqPassword()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetRabbitmqVhost(t *testing.T) {
+	os.Setenv("RABBITMQ_VHOST", "/")
+	defer os.Unsetenv("RABBITMQ_VHOST")
+
+	expected := "/"
+	actual := env.GetRabbitmqVhost()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
