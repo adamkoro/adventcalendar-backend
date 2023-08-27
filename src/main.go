@@ -22,7 +22,11 @@ func init() {
 func main() {
 	router := gin.New()
 	router.Use(gin.Recovery())
-	router.GET("/ping", endpoints.Ping)
+
+	api := router.Group("/api")
+	{
+		api.GET("/ping", endpoints.Ping)
+	}
 
 	server := &http.Server{
 		Addr:         ":" + strconv.Itoa(httpPort),
