@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/adamkoro/adventcalendar-backend/endpoints"
+	endpoints "github.com/adamkoro/adventcalendar-backend/api"
 	"github.com/adamkoro/adventcalendar-backend/env"
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +22,7 @@ func init() {
 func main() {
 	router := gin.New()
 	router.Use(gin.Recovery())
+	router.Use(gin.Logger())
 
 	api := router.Group("/api")
 	{
@@ -34,6 +35,8 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+	log.Println("Starting server...")
+	log.Println("Listening on port " + strconv.Itoa(httpPort))
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
