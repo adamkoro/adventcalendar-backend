@@ -1,0 +1,28 @@
+version: "3.7"
+services:
+  # Postgres
+  dev-postgres:
+    image: docker.io/postgres:15.4-alpine
+    container_name: dev-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: adventcalendar
+  # RabbitMQ
+  dev-rabbitmq:
+    image: docker.io/rabbitmq:3.12.4-management-alpine
+    container_name: dev-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+  # Redis
+  dev-redis:
+    image: docker.io/redis:7.2.0-alpine
+    container_name: dev-redis
+    ports:
+      - "6379:6379"
