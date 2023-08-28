@@ -1,4 +1,4 @@
-package db
+package postgres
 
 import (
 	"strconv"
@@ -85,10 +85,10 @@ func DeleteUser(db *gorm.DB, username string) error {
 	return db.Where("username = ?", username).Delete(&User{}).Error
 }
 
-func UpdatePassword(db *gorm.DB, username string, password string) error {
-	return db.Model(&User{}).Where("username = ?", username).Update("password", password).Error
-}
-
-func UpdateUsername(db *gorm.DB, username string, newUsername string) error {
-	return db.Model(&User{}).Where("username = ?", username).Update("username", newUsername).Error
+func UpdateUser(db *gorm.DB, username string, email string, password string) error {
+	hashpass, err := hashPassword(password)
+	if err != nil {
+		return err
+	}
+	return db.Model(&User{}).Where("username = ?", username).Updates(User{Email: email, Password: hashpass}).Error
 }
