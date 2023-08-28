@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/stretchr/testify v1.8.3
 	golang.org/x/crypto v0.9.0
