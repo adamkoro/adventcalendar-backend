@@ -47,6 +47,7 @@ func main() {
 		api.GET("/ping", endpoints.Ping)
 		api.POST("/login", endpoints.Login)
 		admin := api.Group("/admin")
+		admin.Use(endpoints.AuthRequired)
 		{
 			admin.GET("/user", endpoints.GetUser)
 			admin.POST("/user", endpoints.CreateUser)

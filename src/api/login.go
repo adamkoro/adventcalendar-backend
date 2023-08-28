@@ -1,13 +1,17 @@
 package api
 
 import (
-	"net/http"
-
+	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	postgres "github.com/adamkoro/adventcalendar-backend/postgres"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
+
+var SecretKey string
 
 func Login(c *gin.Context) {
 	var data LoginRequest
@@ -30,7 +34,72 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
+
+	token, err := generateJWT(data.Username)
+	if err != nil {
+		errormessage := "Error generating JWT: " + err.Error()
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.JSON(http.StatusInternalServerError, &errorresp)
+		return
+	}
 	loginresp.Status = "Login successful"
 	log.Println(loginresp.Status)
+	c.SetCookie("token", token, 60, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, &loginresp)
+}
+
+func generateJWT(username string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"exp":        time.Now().Add(1 * time.Minute).Unix(),
+		"authorized": true,
+		"user":       username,
+	})
+	signToken, err := token.SignedString([]byte(SecretKey))
+	if err != nil {
+		return "", err
+	}
+	return signToken, nil
+}
+
+func validateJWT(tokenString string, c *gin.Context) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, fmt.Errorf("invalid token")
+}
+
+func AuthRequired(c *gin.Context) {
+	var errorresp ErrorResponse
+	cookie, err := c.Cookie("token")
+	if err != nil {
+		errormessage := "Error getting cookie: " + err.Error()
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
+	claims, err := validateJWT(cookie, c)
+	if err != nil {
+		errormessage := "Error validating JWT: " + err.Error()
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
+	if claims["authorized"] == true {
+		c.Next()
+	} else {
+		errormessage := "Unauthorized"
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
 }
