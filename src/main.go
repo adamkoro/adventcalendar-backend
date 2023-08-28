@@ -46,10 +46,13 @@ func main() {
 	{
 		api.GET("/ping", endpoints.Ping)
 		api.POST("/login", endpoints.Login)
-		api.POST("/user", endpoints.CreateUser)
-		api.GET("/user", endpoints.GetUser)
-		api.PUT("/user", endpoints.UpdateUser)
-		api.DELETE("/user", endpoints.DeleteUser)
+		admin := api.Group("/admin")
+		{
+			admin.GET("/user", endpoints.GetUser)
+			admin.POST("/user", endpoints.CreateUser)
+			admin.PUT("/user", endpoints.UpdateUser)
+			admin.DELETE("/user", endpoints.DeleteUser)
+		}
 	}
 
 	server := &http.Server{
