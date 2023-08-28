@@ -12,9 +12,9 @@ import (
 var Db *gorm.DB
 
 func CreateUser(c *gin.Context) {
-	var data createUserRequest
-	var errorresp errorResponse
-	var createuserresp successResponse
+	var data CreateUserRequest
+	var errorresp ErrorResponse
+	var createuserresp SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON: " + err.Error()
@@ -38,9 +38,9 @@ func CreateUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	var data getUserRequest
-	var errorresp errorResponse
-	var getuserresp getUserResponse
+	var data UserRequest
+	var errorresp ErrorResponse
+	var getuserresp UserResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON: " + err.Error()
@@ -61,4 +61,56 @@ func GetUser(c *gin.Context) {
 	getuserresp.Username = user.Username
 	getuserresp.Email = user.Email
 	c.JSON(http.StatusOK, &getuserresp)
+}
+
+func UpdateUser(c *gin.Context) {
+	var data CreateUserRequest
+	var errorresp ErrorResponse
+	var updateuserresp SuccessResponse
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		errormessage := "Error binding JSON: " + err.Error()
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.JSON(http.StatusBadRequest, &errorresp)
+		return
+	}
+
+	err := postgres.UpdateUser(Db, data.Username, data.Email, data.Password)
+	if err != nil {
+		errormessage := "Error while updating user: " + err.Error()
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.JSON(http.StatusInternalServerError, &errorresp)
+		return
+	}
+	updateuserresp.Status = "User updated"
+	log.Println(updateuserresp.Status)
+	c.JSON(http.StatusOK, &updateuserresp)
+}
+
+func DeleteUser(c *gin.Context) {
+	var data UserRequest
+	var errorresp ErrorResponse
+	var deleteuserresp SuccessResponse
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		errormessage := "Error binding JSON: " + err.Error()
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.JSON(http.StatusBadRequest, &errorresp)
+		return
+	}
+
+	err := postgres.DeleteUser(Db, data.Username)
+	if err != nil {
+		errormessage := "Error while deleting user: " + err.Error()
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.JSON(http.StatusInternalServerError, &errorresp)
+		return
+	}
+	deleteuserresp.Status = "User deleted"
+	log.Println(deleteuserresp.Status)
+	c.JSON(http.StatusOK, &deleteuserresp)
 }
