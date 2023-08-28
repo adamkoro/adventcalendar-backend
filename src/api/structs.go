@@ -4,6 +4,10 @@ type loginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+type loginResponse struct {
+	Username    string `json:"username"`
+	TokenString string `json:"token"`
+}
 
 type createUserRequest struct {
 	Username string `json:"username" binding:"required"`
@@ -14,6 +18,12 @@ type createUserRequest struct {
 type getUserRequest struct {
 	Username string `json:"username" binding:"required"`
 }
+type getUserResponse struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Created  string `json:"created"`
+	Modified string `json:"modified"`
+}
 
 type errorResponse struct {
 	Error string `json:"error"`
@@ -21,11 +31,4 @@ type errorResponse struct {
 
 type successResponse struct {
 	Status string `json:"status"`
-}
-
-type getUserResponse struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Created  string `json:"created"`
-	Modified string `json:"modified"`
 }

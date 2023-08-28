@@ -32,9 +32,9 @@ func hashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func CheckPasswordHash(password, hash string) bool {
+func checkPasswordHash(password, hash string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+	return err
 }
 
 func Connect() (*gorm.DB, error) {
@@ -66,6 +66,19 @@ func GetUser(db *gorm.DB, username string) (*User, error) {
 	user := &User{}
 	err := db.Where("username = ?", username).First(user).Error
 	return user, err
+}
+
+func Login(db *gorm.DB, username string, password string) error {
+	user := &User{}
+	err := db.Where("username = ?", username).First(user).Error
+	if err != nil {
+		return err
+	}
+	err = checkPasswordHash(password, user.Password)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func DeleteUser(db *gorm.DB, username string) error {
