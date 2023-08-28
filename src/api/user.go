@@ -60,6 +60,8 @@ func GetUser(c *gin.Context) {
 	}
 	getuserresp.Username = user.Username
 	getuserresp.Email = user.Email
+	getuserresp.Created = user.CreatedAt.String()
+	getuserresp.Modified = user.ModifiedAt.String()
 	c.JSON(http.StatusOK, &getuserresp)
 }
 
