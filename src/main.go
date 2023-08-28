@@ -48,6 +48,8 @@ func main() {
 		api.POST("/login", endpoints.Login)
 		api.POST("/user", endpoints.CreateUser)
 		api.GET("/user", endpoints.GetUser)
+		api.PUT("/user", endpoints.UpdateUser)
+		api.DELETE("/user", endpoints.DeleteUser)
 	}
 
 	server := &http.Server{

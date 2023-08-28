@@ -10,9 +10,9 @@ import (
 )
 
 func Login(c *gin.Context) {
-	var data loginRequest
-	var errorresp errorResponse
-	var loginresp successResponse
+	var data LoginRequest
+	var errorresp ErrorResponse
+	var loginresp SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON: " + err.Error()
