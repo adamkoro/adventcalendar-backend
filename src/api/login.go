@@ -45,13 +45,13 @@ func Login(c *gin.Context) {
 	}
 	loginresp.Status = "Login successful"
 	log.Println(loginresp.Status)
-	c.SetCookie("token", token, 60, "/", "localhost", false, true)
+	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, &loginresp)
 }
 
 func generateJWT(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp":        time.Now().Add(1 * time.Minute).Unix(),
+		"exp":        time.Now().Add(86400 * time.Second).Unix(),
 		"authorized": true,
 		"user":       username,
 	})
