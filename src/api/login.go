@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	postgres "github.com/adamkoro/adventcalendar-backend/postgres"
+	"github.com/adamkoro/adventcalendar-backend/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
