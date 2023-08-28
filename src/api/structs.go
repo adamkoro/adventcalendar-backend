@@ -1,34 +1,34 @@
 package api
 
-type loginRequest struct {
+type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
-type loginResponse struct {
+type LoginResponse struct {
 	Username    string `json:"username"`
 	TokenString string `json:"token"`
 }
 
-type createUserRequest struct {
+type CreateUserRequest struct {
 	Username string `json:"username" binding:"required"`
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
-type getUserRequest struct {
+type UserRequest struct {
 	Username string `json:"username" binding:"required"`
 }
-type getUserResponse struct {
+type UserResponse struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Created  string `json:"created"`
 	Modified string `json:"modified"`
 }
 
-type errorResponse struct {
+type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-type successResponse struct {
+type SuccessResponse struct {
 	Status string `json:"status"`
 }
