@@ -92,3 +92,9 @@ func UpdateUser(db *gorm.DB, username string, email string, password string) err
 	}
 	return db.Model(&User{}).Where("username = ?", username).Updates(User{Email: email, Password: hashpass}).Error
 }
+
+func GetAllUsers(db *gorm.DB) ([]User, error) {
+	var users []User
+	err := db.Find(&users).Error
+	return users, err
+}

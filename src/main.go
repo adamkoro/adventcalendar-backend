@@ -44,15 +44,22 @@ func main() {
 
 	api := router.Group("/api")
 	{
+		// Public endpoints
+		// Health check
 		api.GET("/ping", endpoints.Ping)
+		// Login
 		api.POST("/login", endpoints.Login)
+		// Admin endpoints (require authentication)
 		admin := api.Group("/admin")
 		admin.Use(endpoints.AuthRequired)
 		{
+			// Single user
 			admin.GET("/user", endpoints.GetUser)
 			admin.POST("/user", endpoints.CreateUser)
 			admin.PUT("/user", endpoints.UpdateUser)
 			admin.DELETE("/user", endpoints.DeleteUser)
+			// All users
+			admin.GET("/users", endpoints.GetAllUsers)
 		}
 	}
 

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	postgres "github.com/adamkoro/adventcalendar-backend/postgres"
+	"github.com/adamkoro/adventcalendar-backend/postgres"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -63,6 +63,30 @@ func GetUser(c *gin.Context) {
 	getuserresp.Created = user.CreatedAt.String()
 	getuserresp.Modified = user.ModifiedAt.String()
 	c.JSON(http.StatusOK, &getuserresp)
+}
+
+func GetAllUsers(c *gin.Context) {
+	var errorresp ErrorResponse
+	var getallusersresp []UserResponse
+
+	users, err := postgres.GetAllUsers(Db)
+	if err != nil {
+		errormessage := "Error while getting all users: " + err.Error()
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.JSON(http.StatusInternalServerError, &errorresp)
+		return
+	}
+
+	for _, user := range users {
+		var userresp UserResponse
+		userresp.Username = user.Username
+		userresp.Email = user.Email
+		userresp.Created = user.CreatedAt.String()
+		userresp.Modified = user.ModifiedAt.String()
+		getallusersresp = append(getallusersresp, userresp)
+	}
+	c.JSON(http.StatusOK, &getallusersresp)
 }
 
 func UpdateUser(c *gin.Context) {
