@@ -17,9 +17,9 @@ Everything is in Makefile
 - `make test` - Run tests
 - `make tidy` - Update go.mod and go.sum
 - `make docker-run` - Run application in docker
-- `make compose-up` - Run docker-compose
-- `make compose-down` - Stop docker-compose
-- `make compose-ps` - Show docker-compose processes
+- `make compose-up` - Run docker-compose and create dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
+- `make compose-down` - Stop docker-compose and remove dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
+- `make compose-ps` - Show docker-compose dev processes (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
 
 #### Before run
 ```shell
