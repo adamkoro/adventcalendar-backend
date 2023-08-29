@@ -11,7 +11,7 @@ test:
 
 docker-run:
 	docker build -t adventcalendar-api:latest -f Dockerfile . && \
-	docker run -p 8080:8080 adventcalendar-api:latest
+	docker run -p 8080:8080 -p 8081:8081 adventcalendar-api:latest
 
 compose-up:
 	docker-compose -f compose/dev/docker-compose.yml up -d
