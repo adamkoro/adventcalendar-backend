@@ -74,7 +74,7 @@ func main() {
 
 	// Metrics server
 	metrics := gin.New()
-	metrics.GET("/metrics", prometheusHandler())
+	metrics.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	metrics_server := &http.Server{
 		Addr:         ":" + strconv.Itoa(metricsPort),
 		Handler:      metrics,
@@ -112,13 +112,4 @@ func main() {
 		log.Println("timeout of 5 seconds.")
 	}
 	log.Println("Server exiting")
-}
-
-// From: https://stackoverflow.com/questions/65608610/how-to-use-gin-as-a-server-to-write-prometheus-exporter-metrics
-func prometheusHandler() gin.HandlerFunc {
-	h := promhttp.Handler()
-
-	return func(c *gin.Context) {
-		h.ServeHTTP(c.Writer, c.Request)
-	}
 }
