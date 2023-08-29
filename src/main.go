@@ -13,8 +13,10 @@ import (
 	endpoints "github.com/adamkoro/adventcalendar-backend/api"
 	"github.com/adamkoro/adventcalendar-backend/env"
 	"github.com/adamkoro/adventcalendar-backend/postgres"
+	rd "github.com/adamkoro/adventcalendar-backend/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -22,6 +24,7 @@ var (
 	httpPort     int
 	metricsPort  int
 	postgresConn *gorm.DB
+	redirConn    *redis.Client
 )
 
 func init() {
@@ -38,6 +41,13 @@ func init() {
 	}
 	log.Println("Migrated database")
 	endpoints.Db = postgresConn
+	redirConn = rd.Connect()
+	err = rd.Ping(redirConn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Connected to redis")
+	endpoints.Rd = redirConn
 }
 
 func main() {

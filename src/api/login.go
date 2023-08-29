@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,9 +10,13 @@ import (
 	"github.com/adamkoro/adventcalendar-backend/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/redis/go-redis/v9"
 )
 
-var SecretKey string
+var (
+	SecretKey string
+	Rd        *redis.Client
+)
 
 func Login(c *gin.Context) {
 	var data LoginRequest
@@ -45,6 +50,7 @@ func Login(c *gin.Context) {
 	}
 	loginresp.Status = "Login successful"
 	log.Println(loginresp.Status)
+	createSession(Rd, data.Username)
 	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, &loginresp)
 }
@@ -102,4 +108,8 @@ func AuthRequired(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
+}
+
+func createSession(rd *redis.Client, username string) error {
+	return rd.Set(context.Background(), username, true, 86400*time.Second).Err()
 }
