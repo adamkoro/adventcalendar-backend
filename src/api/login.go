@@ -62,6 +62,51 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, &loginresp)
 }
 
+func Logout(c *gin.Context) {
+	cookie, err := c.Cookie("token")
+	if err != nil {
+		errormessage := "Error getting cookie: " + err.Error()
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusBadRequest, &errorresp)
+		return
+	}
+	claims, err := validateJWT(cookie, c)
+	if err != nil {
+		errormessage := "Error validating JWT: " + err.Error()
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusBadRequest, &errorresp)
+		return
+	}
+	if claims["authorized"] != true {
+		errormessage := "Unauthorized"
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
+	if claims["session"] == "" {
+		errormessage := "Session not found"
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
+	err = Rd.Del(context.Background(), claims["session"].(string)).Err()
+	if err != nil {
+		errormessage := "Error deleting session from redis: " + err.Error()
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusInternalServerError, &errorresp)
+		return
+	}
+	logoutresp := SuccessResponse{Status: "Logout successful"}
+	log.Println(logoutresp.Status)
+	c.SetCookie("token", "", 0, "/", "localhost", false, true)
+	c.JSON(http.StatusOK, &logoutresp)
+}
+
 func generateJWT(username string, session string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"exp":        time.Now().Add(86400 * time.Second).Unix(),

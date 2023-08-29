@@ -62,6 +62,8 @@ func main() {
 		api.GET("/ping", endpoints.Ping)
 		// Login
 		api.POST("/login", endpoints.Login)
+		// Logout
+		api.POST("/logout", endpoints.Logout)
 		// Admin endpoints (require authentication)
 		admin := api.Group("/admin")
 		admin.Use(endpoints.AuthRequired)
