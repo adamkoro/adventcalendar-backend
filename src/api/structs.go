@@ -4,10 +4,6 @@ type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
-type LoginResponse struct {
-	Username    string `json:"username"`
-	TokenString string `json:"token"`
-}
 
 type CreateUserRequest struct {
 	Username string `json:"username" binding:"required"`
@@ -31,4 +27,11 @@ type ErrorResponse struct {
 
 type SuccessResponse struct {
 	Status string `json:"status"`
+}
+
+type Session struct {
+	Username string
+	Token    string
+	SourceIP string
+	LoginAt  string
 }

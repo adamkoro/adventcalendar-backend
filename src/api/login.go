@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"github.com/adamkoro/adventcalendar-backend/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -20,13 +22,11 @@ var (
 
 func Login(c *gin.Context) {
 	var data LoginRequest
-	var errorresp ErrorResponse
-	var loginresp SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON: " + err.Error()
 		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errorresp := ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -35,7 +35,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		errormessage := "Username or/and password incorrect"
 		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errorresp := ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -44,13 +44,20 @@ func Login(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error generating JWT: " + err.Error()
 		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errorresp := ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	loginresp.Status = "Login successful"
+	err = createSession(Rd, data.Username, token, c.ClientIP())
+	if err != nil {
+		errormessage := "Error creating session: " + err.Error()
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusInternalServerError, &errorresp)
+		return
+	}
+	loginresp := SuccessResponse{Status: "Login successful"}
 	log.Println(loginresp.Status)
-	createSession(Rd, data.Username)
 	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, &loginresp)
 }
@@ -82,12 +89,11 @@ func validateJWT(tokenString string, c *gin.Context) (jwt.MapClaims, error) {
 }
 
 func AuthRequired(c *gin.Context) {
-	var errorresp ErrorResponse
 	cookie, err := c.Cookie("token")
 	if err != nil {
 		errormessage := "Error getting cookie: " + err.Error()
 		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errorresp := ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -95,7 +101,7 @@ func AuthRequired(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error validating JWT: " + err.Error()
 		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errorresp := ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -104,12 +110,22 @@ func AuthRequired(c *gin.Context) {
 	} else {
 		errormessage := "Unauthorized"
 		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errorresp := ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
 }
 
-func createSession(rd *redis.Client, username string) error {
-	return rd.Set(context.Background(), username, true, 86400*time.Second).Err()
+func createSession(rd *redis.Client, username string, token string, sourceIp string) error {
+	session := Session{
+		Username: username,
+		Token:    token,
+		SourceIP: sourceIp,
+		LoginAt:  time.Now().String(),
+	}
+	data, err := json.Marshal(session)
+	if err != nil {
+		return err
+	}
+	return rd.Set(context.Background(), uuid.New().String(), data, 86400*time.Second).Err()
 }
