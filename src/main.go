@@ -14,16 +14,19 @@ import (
 	"github.com/adamkoro/adventcalendar-backend/env"
 	"github.com/adamkoro/adventcalendar-backend/postgres"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gorm.io/gorm"
 )
 
 var (
 	httpPort     int
+	metricsPort  int
 	postgresConn *gorm.DB
 )
 
 func init() {
 	httpPort = env.GetHttpPort()
+	metricsPort = env.GetMetricsPort()
 	postgresConn, err := postgres.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -38,10 +41,10 @@ func init() {
 }
 
 func main() {
+	// Api server
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
-
 	api := router.Group("/api")
 	{
 		// Public endpoints
@@ -62,19 +65,35 @@ func main() {
 			admin.GET("/users", endpoints.GetAllUsers)
 		}
 	}
-
-	server := &http.Server{
+	api_server := &http.Server{
 		Addr:         ":" + strconv.Itoa(httpPort),
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
+	// Metrics server
+	metrics := gin.New()
+	metrics.GET("/metrics", prometheusHandler())
+	metrics_server := &http.Server{
+		Addr:         ":" + strconv.Itoa(metricsPort),
+		Handler:      metrics,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
 	log.Println("Starting server...")
-	log.Println("Listening on port " + strconv.Itoa(httpPort))
+	log.Println("Listening api on port " + strconv.Itoa(httpPort))
+	log.Println("Listening metrics on port " + strconv.Itoa(metricsPort))
 	go func() {
 		// service connections
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := api_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+	go func() {
+		// metrics
+		if err := metrics_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
@@ -85,7 +104,7 @@ func main() {
 	log.Println("Shutdown Server ...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := server.Shutdown(ctx); err != nil {
+	if err := api_server.Shutdown(ctx); err != nil {
 		log.Fatal("Server Shutdown:", err)
 	}
 	select {
@@ -93,4 +112,13 @@ func main() {
 		log.Println("timeout of 5 seconds.")
 	}
 	log.Println("Server exiting")
+}
+
+// From: https://stackoverflow.com/questions/65608610/how-to-use-gin-as-a-server-to-write-prometheus-exporter-metrics
+func prometheusHandler() gin.HandlerFunc {
+	h := promhttp.Handler()
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
 }

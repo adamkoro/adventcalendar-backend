@@ -13,6 +13,14 @@ func GetHttpPort() int {
 	return port
 }
 
+func GetMetricsPort() int {
+	port := 8081
+	if os.Getenv("METRICS_PORT") != "" {
+		port, _ = strconv.Atoi(os.Getenv("METRICS_PORT"))
+	}
+	return port
+}
+
 func GetDbHost() string {
 	host := "localhost"
 	if os.Getenv("DB_HOST") != "" {
