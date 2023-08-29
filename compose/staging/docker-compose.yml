@@ -1,0 +1,69 @@
+version: "3.7"
+services:
+  # AdventCalendar-Backend
+  dev-adventcalendar-backend:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    container_name: dev-adventcalendar-backend
+    environment:
+      - "DB_HOST=dev-postgres"
+      - "DB_USER=postgres"
+      - "DB_PASSWORD=postgres"
+      - "RABBITMQ_HOST=dev-rabbitmq"
+      - "RABBITMQ_USER=rabbitmq"
+      - "RABBITMQ_PASSWORD=rabbitmq"
+      - "REDIS_HOST=dev-redis"
+      - "REDIS_DB=0"
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+  # Postgres
+  dev-postgres:
+    image: docker.io/postgres:15.4-alpine
+    container_name: dev-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: adventcalendar
+  # RabbitMQ
+  dev-rabbitmq:
+    image: docker.io/rabbitmq:3.12.4-management-alpine
+    container_name: dev-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+  # Redis
+  dev-redis:
+    image: docker.io/redis:7.2.0-alpine
+    container_name: dev-redis
+    ports:
+      - "6379:6379"
+  dev-prometheus:
+    image: docker.io/prom/prometheus:v2.46.0
+    container_name: dev-prometheus
+    ports:
+      - "9090:9090"
+    #volumes:
+    #  - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  dev-grafana:
+    image: docker.io/grafana/grafana:10.1.0
+    container_name: dev-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: GrafanaViewer
+      GF_AUTH_ANONYMOUS_ORG_NAME: AdventCalendar
+      GF_AUTH_ANONYMOUS_ORG_ID: 1
+    #volumes:
+    #  - ./grafana/provisioning:/etc/grafana/provisioning
+    #  - ./grafana/dashboards:/var/lib/grafana/dashboards
+networks:
+  default:
+    name: dev-adventcalendar
