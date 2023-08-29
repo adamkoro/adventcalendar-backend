@@ -86,7 +86,7 @@ func main() {
 	log.Println("Listening api on port " + strconv.Itoa(httpPort))
 	log.Println("Listening metrics on port " + strconv.Itoa(metricsPort))
 	go func() {
-		// service connections
+		// api
 		if err := api_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
