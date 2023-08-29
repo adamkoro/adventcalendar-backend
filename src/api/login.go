@@ -39,8 +39,8 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
-
-	token, err := generateJWT(data.Username)
+	session_uuid := uuid.New().String()
+	token, err := generateJWT(data.Username, session_uuid)
 	if err != nil {
 		errormessage := "Error generating JWT: " + err.Error()
 		log.Println(errormessage)
@@ -48,7 +48,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	err = createSession(Rd, data.Username, token, c.ClientIP())
+	err = createSession(Rd, data.Username, token, c.ClientIP(), session_uuid)
 	if err != nil {
 		errormessage := "Error creating session: " + err.Error()
 		log.Println(errormessage)
@@ -62,11 +62,12 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, &loginresp)
 }
 
-func generateJWT(username string) (string, error) {
+func generateJWT(username string, session string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"exp":        time.Now().Add(86400 * time.Second).Unix(),
 		"authorized": true,
 		"user":       username,
+		"session":    session,
 	})
 	signToken, err := token.SignedString([]byte(SecretKey))
 	if err != nil {
@@ -105,18 +106,48 @@ func AuthRequired(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
-	if claims["authorized"] == true {
-		c.Next()
-	} else {
+	if claims["authorized"] != true {
 		errormessage := "Unauthorized"
 		log.Println(errormessage)
 		errorresp := ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
+	if claims["session"] == "" {
+		errormessage := "Session not found"
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
+	backend_session, err := Rd.Get(context.Background(), claims["session"].(string)).Bytes()
+	if err != nil {
+		errormessage := "Error getting session from redis: " + err.Error()
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, &errorresp)
+		return
+	}
+	var tokenSession Session
+	err = json.Unmarshal(backend_session, &tokenSession)
+	if err != nil {
+		errormessage := "Error unmarshalling session: " + err.Error()
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, &errorresp)
+		return
+	}
+	if cookie != tokenSession.Token || c.ClientIP() != tokenSession.SourceIP {
+		errormessage := "Session invalid"
+		log.Println(errormessage)
+		errorresp := ErrorResponse{Error: errormessage}
+		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
+	c.Next()
 }
 
-func createSession(rd *redis.Client, username string, token string, sourceIp string) error {
+func createSession(rd *redis.Client, username string, token string, sourceIp string, session_uuid string) error {
 	session := Session{
 		Username: username,
 		Token:    token,
@@ -127,5 +158,5 @@ func createSession(rd *redis.Client, username string, token string, sourceIp str
 	if err != nil {
 		return err
 	}
-	return rd.Set(context.Background(), uuid.New().String(), data, 86400*time.Second).Err()
+	return rd.Set(context.Background(), session_uuid, data, 86400*time.Second).Err()
 }
