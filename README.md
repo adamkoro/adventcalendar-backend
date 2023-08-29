@@ -39,30 +39,30 @@ make docker-run
 ## Api endpoints
 **TODO**: Swagger documentation
 ### Public endpoints
-- `GET /api/ping` - Health check
-- `POST /api/login` - User login
-- `POST /api/logout` - User logout **UNDER IMPLEMENTATION**
-- `GET /metrics` - Prometheus metrics
+- `GET /api/ping`
+  - Health check
+- `POST /api/login` 
+  - User login
+  - Payload (example): `{"username": "testuser1", "password": "testpassword1"}`
+- `POST /api/logout` 
+  - User logout
+- `GET /metrics`
+  - Prometheus metrics
 ### Private endpoints - Authentication required
 Authentication is required for all endpoints below.
 Based on JWT(Json Web Token) authentication. Before using private endpoints, you need to get JWT token from `/api/login` endpoint.
 
 - `GET /api/admin/user` 
   - Get user
-  - Payload (example): 
-    - `{"username": "testuser1"}`
+  - Payload (example): `{"username": "testuser1"}`
 - `POST /api/admin/user` 
   - Create user
-  - Payload (example): 
-    - `{"username": "testuser1", "email": "testuser1@test.local", "password": "testpassword1"}`
+  - Payload (example): `{"username": "testuser1", "email": "testuser1@test.local", "password": "testpassword1"}`
 - `PUT /api/admin/user` 
   - Update user
-  - Payload (example): 
-    - `{"username": "testuser1", "email": "testuser1@gmail.com", "password": "testpassword1"}`
+  - Payload (example): `{"username": "testuser1", "email": "testuser1@gmail.com", "password": "testpassword1"}`
 - `DELETE /api/admin/user`
   - Delete user
-  - Payload (example): 
-    - `{"username": "testuser1"}`
+  - Payload (example): `{"username": "testuser1"}`
 - `GET /api/admin/users` 
   - Get all users
-  - Payload: **not need**
