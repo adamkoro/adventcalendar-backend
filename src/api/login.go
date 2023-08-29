@@ -33,7 +33,7 @@ func Login(c *gin.Context) {
 
 	err := postgres.Login(Db, data.Username, data.Password)
 	if err != nil {
-		errormessage := "Username or/and password incorrect"
+		errormessage := "Username or password incorrect"
 		log.Println(errormessage)
 		errorresp := ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusUnauthorized, &errorresp)
