@@ -19,6 +19,18 @@ func TestGetHttpPort(t *testing.T) {
 	}
 }
 
+func TestGetMetricsPort(t *testing.T) {
+	os.Setenv("METRICS_PORT", "8081")
+	defer os.Unsetenv("METRICS_PORT")
+
+	expected := 8081
+	actual := env.GetMetricsPort()
+
+	if actual != expected {
+		t.Errorf("expected %d, got %d", expected, actual)
+	}
+}
+
 func TestGetDbHost(t *testing.T) {
 	os.Setenv("DB_HOST", "localhost")
 	defer os.Unsetenv("DB_HOST")
