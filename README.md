@@ -17,13 +17,18 @@ Everything is in Makefile
 - `make test` - Run tests
 - `make tidy` - Update go.mod and go.sum
 - `make docker-run` - Run application in docker
-- `make compose-up` - Run docker-compose and create dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
-- `make compose-down` - Stop docker-compose and remove dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
-- `make compose-ps` - Show docker-compose dev processes (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
+#### Dev environment run services only
+- `make compose-up-dev` - Run docker-compose and create dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
+- `make compose-down-dev` - Stop docker-compose and remove dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
+- `make compose-ps-dev` - Show docker-compose dev processes (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
+#### Stage environment run services and dockerized application
+- `make compose-up-stage` - Run docker-compose and create stage services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana, Adventcalendar-backend)
+- `make compose-down-stage` - Stop docker-compose and remove stage services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana, Adventcalendar-backend)
+- `make compose-ps-stage` - Show docker-compose stage processes (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana, Adventcalendar-backend)
 
 #### Before run
 ```shell
-make compose-up
+make compose-up-dev
 ```
 #### Shell
 ```shell
