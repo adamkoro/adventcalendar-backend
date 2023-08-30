@@ -3,7 +3,7 @@ services:
   # AdventCalendar-Backend
   staging-adventcalendar-backend:
     build:
-      context: ../../
+      context: ../../admin-api/
       dockerfile: Dockerfile
     container_name: staging-adventcalendar-backend
     environment:
