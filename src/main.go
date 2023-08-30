@@ -30,6 +30,7 @@ var (
 func init() {
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
+	// Database
 	postgresConn, err := postgres.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -41,6 +42,7 @@ func init() {
 	}
 	log.Println("Migrated database")
 	endpoints.Db = postgresConn
+	// Redis
 	redirConn = rd.Connect()
 	err = rd.Ping(redirConn)
 	if err != nil {
@@ -48,6 +50,21 @@ func init() {
 	}
 	log.Println("Connected to redis")
 	endpoints.Rd = redirConn
+	// Admin user create and update
+	err = postgres.CreateUser(postgresConn, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
+	if err != nil {
+		log.Println(err)
+	}
+	isAdminExists, err := postgres.GetUser(postgresConn, env.GetAdminUsername())
+	if err != nil {
+		log.Fatal(err)
+	}
+	if isAdminExists.Username != "" {
+		err = postgres.UpdateUser(postgresConn, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
+		if err != nil {
+			log.Println(err)
+		}
+	}
 }
 
 func main() {

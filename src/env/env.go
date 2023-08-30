@@ -5,6 +5,30 @@ import (
 	"strconv"
 )
 
+func GetAdminUsername() string {
+	username := "admin"
+	if os.Getenv("ADMIN_USERNAME") != "" {
+		username = os.Getenv("ADMIN_USERNAME")
+	}
+	return username
+}
+
+func GetAdminEmail() string {
+	email := "admin@admin.local"
+	if os.Getenv("ADMIN_EMAIL") != "" {
+		email = os.Getenv("ADMIN_EMAIL")
+	}
+	return email
+}
+
+func GetAdminPassword() string {
+	password := "admin"
+	if os.Getenv("ADMIN_PASSWORD") != "" {
+		password = os.Getenv("ADMIN_PASSWORD")
+	}
+	return password
+}
+
 func GetHttpPort() int {
 	port := 8080
 	if os.Getenv("PORT") != "" {
