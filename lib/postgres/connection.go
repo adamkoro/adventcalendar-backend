@@ -3,29 +3,10 @@ package postgres
 import (
 	"strconv"
 
-	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-
-var (
-	dbHost     string
-	dbPort     int
-	dbUser     string
-	dbPassword string
-	dbName     string
-	sslmode    string
-)
-
-func init() {
-	dbHost = env.GetDbHost()
-	dbPort = env.GetDbPort()
-	dbUser = env.GetDbUser()
-	dbPassword = env.GetDbPassword()
-	dbName = env.GetDbName()
-	sslmode = env.GetDbSslMode()
-}
 
 func hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
@@ -37,7 +18,7 @@ func checkPasswordHash(password, hash string) error {
 	return err
 }
 
-func Connect() (*gorm.DB, error) {
+func Connect(dbHost string, dbUser string, dbPassword string, dbName string, dbPort int, sslmode string) (*gorm.DB, error) {
 	dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPassword + " dbname=" + dbName + " port=" + strconv.Itoa(dbPort) + " sslmode=" + sslmode
 	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
 }
