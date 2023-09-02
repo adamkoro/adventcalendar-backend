@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/adamkoro/adventcalendar-backend/postgres"
+	"github.com/adamkoro/adventcalendar-backend/admin-api/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"

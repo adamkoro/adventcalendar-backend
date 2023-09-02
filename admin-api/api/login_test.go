@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/adamkoro/adventcalendar-backend/api"
-	postgres "github.com/adamkoro/adventcalendar-backend/postgres"
+	"github.com/adamkoro/adventcalendar-backend/admin-api/api"
+	postgres "github.com/adamkoro/adventcalendar-backend/admin-api/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

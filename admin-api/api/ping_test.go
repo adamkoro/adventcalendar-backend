@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	endpoints "github.com/adamkoro/adventcalendar-backend/api"
+	endpoints "github.com/adamkoro/adventcalendar-backend/admin-api/api"
 	"github.com/gin-gonic/gin"
 )
 

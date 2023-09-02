@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/adamkoro/adventcalendar-backend/postgres"
+	"github.com/adamkoro/adventcalendar-backend/admin-api/postgres"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
