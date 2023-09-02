@@ -1,4 +1,4 @@
-module github.com/adamkoro/adventcalendar-backend
+module github.com/adamkoro/adventcalendar-backend/admin-api
 
 go 1.20
 

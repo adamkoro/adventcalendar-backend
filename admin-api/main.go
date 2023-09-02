@@ -10,10 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	endpoints "github.com/adamkoro/adventcalendar-backend/api"
-	"github.com/adamkoro/adventcalendar-backend/env"
-	"github.com/adamkoro/adventcalendar-backend/postgres"
-	rd "github.com/adamkoro/adventcalendar-backend/redis"
+	endpoints "github.com/adamkoro/adventcalendar-backend/admin-api/api"
+	"github.com/adamkoro/adventcalendar-backend/admin-api/env"
+	"github.com/adamkoro/adventcalendar-backend/admin-api/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
@@ -27,51 +26,20 @@ var (
 	redirConn    *redis.Client
 )
 
-func init() {
+func main() {
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
-	// Database
-	postgresConn, err := postgres.Connect()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Connected to database")
-	err = postgres.Migrate(postgresConn)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Migrated database")
-	endpoints.Db = postgresConn
-	// Redis
-	redirConn = rd.Connect()
-	err = rd.Ping(redirConn)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Connected to redis")
-	endpoints.Rd = redirConn
-	// Admin user create and update
-	err = postgres.CreateUser(postgresConn, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
-	if err != nil {
-		log.Println(err)
-	}
-	isAdminExists, err := postgres.GetUser(postgresConn, env.GetAdminUsername())
-	if err != nil {
-		log.Fatal(err)
-	}
-	if isAdminExists.Username != "" {
-		err = postgres.UpdateUser(postgresConn, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
-		if err != nil {
-			log.Println(err)
-		}
-	}
-}
+	postgresChannel := make(chan *gorm.DB, 1)
+	postgresConn, _ = postgres.Connect()
+	dbctx, dbcancel := context.WithCancel(context.Background())
+	defer dbcancel()
+	go monitorDbConnection(dbctx, postgresConn, postgresChannel)
 
-func main() {
 	// Api server
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
+	router.Use(CORSMiddleware())
 	api := router.Group("/api")
 	{
 		// Public endpoints
@@ -142,3 +110,65 @@ func main() {
 	}
 	log.Println("Server exiting")
 }
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3030")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, Access-Control-Allow-Credentials")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func monitorDbConnection(ctx context.Context, db *gorm.DB, dbchannel chan *gorm.DB) {
+	ticker := time.NewTicker(time.Second * 5)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			if err := postgres.Ping(postgresConn); err != nil {
+				log.Printf("DB connection lost. Retrying...")
+				db, err = postgres.Connect()
+				if err != nil {
+					log.Println(err)
+				}
+				dbchannel <- db
+			}
+		}
+	}
+}
+
+/*func dada() {
+	// Redis
+	redirConn = rd.Connect()
+	err = rd.Ping(redirConn)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("Connected to redis")
+	endpoints.Rd = redirConn
+	// Admin user create and update
+	err = postgres.CreateUser(postgresConn, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
+	if err != nil {
+		log.Println(err)
+	}
+	isAdminExists, err := postgres.GetUser(postgresConn, env.GetAdminUsername())
+	if err != nil {
+		log.Println(err)
+	}
+	if isAdminExists.Username != "" {
+		err = postgres.UpdateUser(postgresConn, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}*/
