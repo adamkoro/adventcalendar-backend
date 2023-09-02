@@ -4,15 +4,14 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	"github.com/redis/go-redis/v9"
 )
 
-func Connect() *redis.Client {
+func Connect(host string, port int, password string, database int) *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     env.GetRedisHost() + ":" + strconv.Itoa(env.GetRedisPort()),
-		Password: env.GetRedisPassword(),
-		DB:       env.GetRedisDb(),
+		Addr:     host + ":" + strconv.Itoa(port),
+		Password: password,
+		DB:       database,
 	})
 }
 
