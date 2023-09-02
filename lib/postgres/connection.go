@@ -3,7 +3,7 @@ package postgres
 import (
 	"strconv"
 
-	"github.com/adamkoro/adventcalendar-backend/admin-api/env"
+	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

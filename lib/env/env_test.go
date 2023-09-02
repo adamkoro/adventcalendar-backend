@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/adamkoro/adventcalendar-backend/admin-api/env"
+	"github.com/adamkoro/adventcalendar-backend/lib/env"
 )
 
 func TestGetHttpPort(t *testing.T) {

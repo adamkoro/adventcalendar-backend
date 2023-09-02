@@ -3,7 +3,7 @@ package postgres_test
 import (
 	"testing"
 
-	"github.com/adamkoro/adventcalendar-backend/admin-api/postgres"
+	"github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/stretchr/testify/assert"
 )
 

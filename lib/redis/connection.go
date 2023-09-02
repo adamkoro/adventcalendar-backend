@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/adamkoro/adventcalendar-backend/admin-api/env"
+	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	"github.com/redis/go-redis/v9"
 )
 
