@@ -98,3 +98,11 @@ func GetAllUsers(db *gorm.DB) ([]User, error) {
 	err := db.Find(&users).Error
 	return users, err
 }
+
+func Ping(db *gorm.DB) error {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return err
+	}
+	return sqlDB.Ping()
+}
