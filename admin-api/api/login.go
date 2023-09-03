@@ -182,7 +182,7 @@ func AuthRequired(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	if cookie != tokenSession.Token || c.ClientIP() != tokenSession.SourceIP {
+	if cookie != tokenSession.Token {
 		errormessage := "Session invalid"
 		log.Println(errormessage)
 		errorresp := ErrorResponse{Error: errormessage}
