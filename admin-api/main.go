@@ -32,10 +32,12 @@ func main() {
 	metricsPort = env.GetMetricsPort()
 	// Postgres connection check
 	go func() {
+		var isConnected bool
 		postgresConn, err := createPostgresConnection()
 		if err != nil {
 			log.Println(err)
 		}
+		isConnected = true
 		log.Println("Connected to the postgres.")
 		for {
 			err := postgres.Ping(postgresConn)
@@ -43,7 +45,13 @@ func main() {
 				log.Println("Lost connection to the postgres, reconnecting...")
 				postgresConn, err = createPostgresConnection()
 				if err != nil {
+					isConnected = false
 					log.Println("Failed to reconnect to the postgres.")
+				}
+			} else {
+				if !isConnected {
+					log.Println("Reconnected to the postgres.")
+					isConnected = true
 				}
 			}
 			endpoints.Db = postgresConn
@@ -53,8 +61,10 @@ func main() {
 
 	// Redis connection check
 	go func() {
+		var isConnected bool
 		redisConn = createRedisConnection()
 		if redisConn != nil {
+			isConnected = true
 			log.Println("Connected to the redis.")
 		}
 		for {
@@ -63,7 +73,13 @@ func main() {
 				log.Println("Lost connection to the redis, reconnecting...")
 				redisConn = createRedisConnection()
 				if err != nil {
+					isConnected = false
 					log.Println("Failed to reconnect to the redis.")
+				}
+			} else {
+				if !isConnected {
+					log.Println("Reconnected to the redis.")
+					isConnected = true
 				}
 			}
 			endpoints.Rd = redisConn
