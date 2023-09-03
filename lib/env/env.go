@@ -5,6 +5,14 @@ import (
 	"strconv"
 )
 
+func GetSecretKey() string {
+	secret := "secret"
+	if os.Getenv("SECRET_KEY") != "" {
+		secret = os.Getenv("SECRET_KEY")
+	}
+	return secret
+}
+
 func GetAdminUsername() string {
 	username := "admin"
 	if os.Getenv("ADMIN_USERNAME") != "" {

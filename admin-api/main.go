@@ -30,6 +30,7 @@ var (
 func main() {
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
+	endpoints.SecretKey = env.GetSecretKey()
 	// Postgres connection check
 	go func() {
 		var isConnected bool
