@@ -80,6 +80,7 @@ func GetAllUsers(c *gin.Context) {
 
 	for _, user := range users {
 		var userresp UserResponse
+		userresp.Id = int(user.Key)
 		userresp.Username = user.Username
 		userresp.Email = user.Email
 		userresp.Created = user.CreatedAt.String()

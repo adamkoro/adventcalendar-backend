@@ -15,6 +15,7 @@ type UserRequest struct {
 	Username string `json:"username" binding:"required"`
 }
 type UserResponse struct {
+	Id       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Created  string `json:"created"`
