@@ -11,8 +11,9 @@ import (
 	"time"
 
 	endpoints "github.com/adamkoro/adventcalendar-backend/admin-api/api"
-	"github.com/adamkoro/adventcalendar-backend/admin-api/env"
-	"github.com/adamkoro/adventcalendar-backend/admin-api/postgres"
+	"github.com/adamkoro/adventcalendar-backend/lib/env"
+	"github.com/adamkoro/adventcalendar-backend/lib/postgres"
+	rd "github.com/adamkoro/adventcalendar-backend/lib/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
@@ -23,17 +24,52 @@ var (
 	httpPort     int
 	metricsPort  int
 	postgresConn *gorm.DB
-	redirConn    *redis.Client
+	redisConn    *redis.Client
 )
 
 func main() {
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
-	postgresChannel := make(chan *gorm.DB, 1)
-	postgresConn, _ = postgres.Connect()
-	dbctx, dbcancel := context.WithCancel(context.Background())
-	defer dbcancel()
-	go monitorDbConnection(dbctx, postgresConn, postgresChannel)
+	// Postgres connection check
+	go func() {
+		postgresConn, err := createPostgresConnection()
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println("Connected to the postgres.")
+		for {
+			err := postgres.Ping(postgresConn)
+			if err != nil {
+				log.Println("Lost connection to the postgres, reconnecting...")
+				postgresConn, err = createPostgresConnection()
+				if err != nil {
+					log.Println("Failed to reconnect to the postgres.")
+				}
+			}
+			endpoints.Db = postgresConn
+			time.Sleep(5 * time.Second)
+		}
+	}()
+
+	// Redis connection check
+	go func() {
+		redisConn = createRedisConnection()
+		if redisConn != nil {
+			log.Println("Connected to the redis.")
+		}
+		for {
+			err := rd.Ping(redisConn)
+			if err != nil {
+				log.Println("Lost connection to the redis, reconnecting...")
+				redisConn = createRedisConnection()
+				if err != nil {
+					log.Println("Failed to reconnect to the redis.")
+				}
+			}
+			endpoints.Rd = redisConn
+			time.Sleep(5 * time.Second)
+		}
+	}()
 
 	// Api server
 	router := gin.New()
@@ -127,48 +163,10 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func monitorDbConnection(ctx context.Context, db *gorm.DB, dbchannel chan *gorm.DB) {
-	ticker := time.NewTicker(time.Second * 5)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			if err := postgres.Ping(postgresConn); err != nil {
-				log.Printf("DB connection lost. Retrying...")
-				db, err = postgres.Connect()
-				if err != nil {
-					log.Println(err)
-				}
-				dbchannel <- db
-			}
-		}
-	}
+func createPostgresConnection() (*gorm.DB, error) {
+	return postgres.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
 }
 
-/*func dada() {
-	// Redis
-	redirConn = rd.Connect()
-	err = rd.Ping(redirConn)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("Connected to redis")
-	endpoints.Rd = redirConn
-	// Admin user create and update
-	err = postgres.CreateUser(postgresConn, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
-	if err != nil {
-		log.Println(err)
-	}
-	isAdminExists, err := postgres.GetUser(postgresConn, env.GetAdminUsername())
-	if err != nil {
-		log.Println(err)
-	}
-	if isAdminExists.Username != "" {
-		err = postgres.UpdateUser(postgresConn, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
-		if err != nil {
-			log.Println(err)
-		}
-	}
-}*/
+func createRedisConnection() *redis.Client {
+	return rd.Connect(env.GetRedisHost(), env.GetRedisPort(), env.GetRedisPassword(), env.GetRedisDb())
+}
