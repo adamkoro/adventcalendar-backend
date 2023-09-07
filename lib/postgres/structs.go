@@ -4,9 +4,9 @@ import "time"
 
 type User struct {
 	Key        uint      `gorm:"primaryKey"`
-	Username   string    `gorm:"unique, not null"`
-	Email      string    `gorm:"unique, not null"`
-	Password   string    `gorm:"not null"`
+	Username   string    `gorm:"type:varchar(32);unique;not null"`
+	Email      string    `gorm:"type:varchar(255);unique;not null"`
+	Password   string    `gorm:"type:varchar(255);not null"`
 	CreatedAt  time.Time `gorm:"autoCreateTime"`
 	ModifiedAt time.Time `gorm:"autoUpdateTime"`
 }
