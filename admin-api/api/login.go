@@ -139,7 +139,7 @@ func AuthRequired(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error getting cookie: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := ErrorResponse{Error: "cookie not found"}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
