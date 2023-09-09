@@ -8,12 +8,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func hashPassword(password string) (string, error) {
+func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
-func checkPasswordHash(password, hash string) error {
+func CheckPasswordHash(password, hash string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err
 }
@@ -36,7 +36,7 @@ func Close(db *gorm.DB) error {
 }
 
 func CreateUser(db *gorm.DB, username string, email string, password string) error {
-	hashpass, err := hashPassword(password)
+	hashpass, err := HashPassword(password)
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func Login(db *gorm.DB, username string, password string) error {
 	if err != nil {
 		return err
 	}
-	err = checkPasswordHash(password, user.Password)
+	err = CheckPasswordHash(password, user.Password)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func DeleteUser(db *gorm.DB, username string) error {
 }
 
 func UpdateUser(db *gorm.DB, username string, email string, password string) error {
-	hashpass, err := hashPassword(password)
+	hashpass, err := HashPassword(password)
 	if err != nil {
 		return err
 	}
