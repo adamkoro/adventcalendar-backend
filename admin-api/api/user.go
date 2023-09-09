@@ -128,7 +128,13 @@ func DeleteUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
-
+	if data.Username == "admin" {
+		errormessage := "Cannot delete admin user"
+		log.Println(errormessage)
+		errorresp.Error = errormessage
+		c.JSON(http.StatusBadRequest, &errorresp)
+		return
+	}
 	err := postgres.DeleteUser(Db, data.Username)
 	if err != nil {
 		errormessage := "Error while deleting user: " + err.Error()
