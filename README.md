@@ -41,7 +41,6 @@ Everything is in Makefile
 - `make test` - Run tests
 - `make tidy` - Update go.mod and go.sum
 - `make build` - Build application binary
-- `make docker-run` - Run application in docker
 
 #### Dev environment run services only
 - `make compose-up-dev` - Run docker-compose and create dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
@@ -56,19 +55,15 @@ Everything is in Makefile
 ```shell
 make compose-up-dev
 ```
-### Run application
+### Setup application
 Before run application, you need to initialize database and create admin user.
 #### Initialize database
 ```shell
 cd admin-api-init && make run
 ```
-#### Shell
+#### Run application
 ```shell
 cd admin-api && make run
-```
-#### Docker
-```shell
-cd admin-api && make docker-run
 ```
 ### Access to application
 - `http://localhost:8080` - Application
