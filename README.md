@@ -16,7 +16,9 @@ Everything is in Makefile
 - `make run` - Run application
 - `make test` - Run tests
 - `make tidy` - Update go.mod and go.sum
+- `make build` - Build application binary
 - `make docker-run` - Run application in docker
+
 #### Dev environment run services only
 - `make compose-up-dev` - Run docker-compose and create dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
 - `make compose-down-dev` - Stop docker-compose and remove dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
@@ -26,17 +28,23 @@ Everything is in Makefile
 - `make compose-down-stage` - Stop docker-compose and remove stage services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana, Adventcalendar-backend)
 - `make compose-ps-stage` - Show docker-compose stage processes (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana, Adventcalendar-backend)
 
-#### Before run
+### Create dev environment
 ```shell
 make compose-up-dev
 ```
+### Run application
+Before run application, you need to initialize database and create admin user.
+#### Initialize database
+```shell
+cd admin-api-init && make run
+```
 #### Shell
 ```shell
-make run
+cd admin-api && make run
 ```
 #### Docker
 ```shell
-make docker-run
+cd admin-api && make docker-run
 ```
 ### Access to application
 - `http://localhost:8080` - Application
