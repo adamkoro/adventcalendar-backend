@@ -10,6 +10,30 @@
 - Redis
 - Rabbitmq
 
+## Environment variables
+- `SECRET_KEY` - Secret key for JWT token (default: `secret`)
+- `ADMIN_USERNAME` - Admin username (default: `admin`)
+- `ADMIN_EMAIL` - Admin email (default: `admin@admin.local`)
+- `ADMIN_PASSWORD` - Admin password (default: `admin`)
+- `PORT` - Api port (default: `8080`)
+- `METRICS_PORT` - Api metrics port (default: `8081`)
+- `DB_HOST` - PostgreSQL host (default: `localhost`)
+- `DB_PORT` - PostgreSQL port (default: `5432`)
+- `DB_USER` - PostgreSQL user (default: `postgres`)
+- `DB_PASSWORD` - PostgreSQL password (default: `postgres`)
+- `DB_NAME` - PostgreSQL database name (default: `postgres`)
+- `DB_SSL_MODE` - PostgreSQL ssl mode (default: `disable`)
+- `REDIS_HOST` - Redis host (default: `localhost`)
+- `REDIS_PORT` - Redis port (default: `6379`)
+- `REDIS_PASSWORD` - Redis password (default: `""`)
+- `REDIS_DB` - Redis database (default: `0`)
+- `RABBITMQ_HOST` - Rabbitmq host (default: `localhost`)
+- `RABBITMQ_PORT` - Rabbitmq port (default: `5672`)
+- `RABBITMQ_USER` - Rabbitmq user (default: `guest`)
+- `RABBITMQ_PASSWORD` - Rabbitmq password (default: `guest`)
+- `RABBITMQ_VHOST` - Rabbitmq vhost (default: `/`)
+
+
 ## How to run
 Everything is in Makefile
 ### Makefile commands
