@@ -1,27 +1,41 @@
 version: "3.7"
 services:
-  # AdventCalendar-Backend
-  staging-adventcalendar-backend:
+  # AdventCalendar-Init
+  adventcalendar-init:
     build:
-      context: ../../admin-api/
-      dockerfile: Dockerfile
-    container_name: staging-adventcalendar-backend
+      context: ../../
+      dockerfile: admin-api-init/Dockerfile
     environment:
-      - "DB_HOST=dev-postgres"
+      - "DB_HOST=adventcalendar-postgres"
       - "DB_USER=postgres"
       - "DB_PASSWORD=postgres"
-      - "RABBITMQ_HOST=dev-rabbitmq"
+    depends_on:
+      - adventcalendar-postgres
+  # AdventCalendar-Backend
+  adventcalendar-backend:
+    build:
+      context: ../../
+      dockerfile: admin-api/Dockerfile
+    environment:
+      - "DB_HOST=adventcalendar-postgres"
+      - "DB_USER=postgres"
+      - "DB_PASSWORD=postgres"
+      - "RABBITMQ_HOST=adventcalendar-rabbitmq"
       - "RABBITMQ_USER=rabbitmq"
       - "RABBITMQ_PASSWORD=rabbitmq"
-      - "REDIS_HOST=dev-redis"
+      - "REDIS_HOST=adventcalendar-redis"
       - "REDIS_DB=0"
     ports:
       - "8080:8080"
       - "8081:8081"
+    depends_on:
+      - adventcalendar-postgres
+      - adventcalendar-rabbitmq
+      - adventcalendar-redis
+      - adventcalendar-init
   # Postgres
-  staging-postgres:
+  adventcalendar-postgres:
     image: docker.io/postgres:15.4-alpine
-    container_name: staging-postgres
     ports:
       - "5432:5432"
     environment:
@@ -29,9 +43,8 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: adventcalendar
   # RabbitMQ
-  staging-rabbitmq:
+  adventcalendar-rabbitmq:
     image: docker.io/rabbitmq:3.12.4-management-alpine
-    container_name: staging-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -39,21 +52,18 @@ services:
       RABBITMQ_DEFAULT_USER: rabbitmq
       RABBITMQ_DEFAULT_PASS: rabbitmq
   # Redis
-  staging-redis:
+  adventcalendar-redis:
     image: docker.io/redis:7.2.0-alpine
-    container_name: staging-redis
     ports:
       - "6379:6379"
-  staging-prometheus:
+  adventcalendar-prometheus:
     image: docker.io/prom/prometheus:v2.46.0
-    container_name: staging-prometheus
     ports:
       - "9090:9090"
     #volumes:
     #  - ./prometheus.yml:/etc/prometheus/prometheus.yml
-  staging-grafana:
+  adventcalendar-grafana:
     image: docker.io/grafana/grafana:10.1.0
-    container_name: staging-grafana
     ports:
       - "3000:3000"
     environment:
