@@ -23,13 +23,15 @@ func main() {
 	// Check if admin user exists
 	isAdminExists, err := postgres.GetUser(db, env.GetAdminUsername())
 	if err != nil {
-		log.Println(err)
+		log.Println("Admin user does not exist.")
+		log.Println("Admin user will be created.")
 		// Admin user create
 		err = postgres.CreateUser(db, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
 		if err != nil {
 			log.Fatal(err)
 		}
 		log.Println("Admin user created.")
+		return
 	}
 	log.Println("Admin user exists.")
 	// Update admin user if exists and password is not match
