@@ -37,16 +37,20 @@
 ## How to run
 Everything is in Makefile
 ### Makefile commands
+In [admin-api-init](./admin-api-init/) and [admin-api](./admin-api/) directory
 - `make run` - Run application
 - `make test` - Run tests
 - `make tidy` - Update go.mod and go.sum
 - `make build` - Build application binary
 
-#### Dev environment run services only
+### Environments
+In [root](./) directory
+- `make build-images` - Build docker images
+#### Dev environment, run services only
 - `make compose-up-dev` - Run docker-compose and create dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
 - `make compose-down-dev` - Stop docker-compose and remove dev services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
 - `make compose-ps-dev` - Show docker-compose dev processes (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana)
-#### Stage environment run services and dockerized application
+#### Stage environment, run services and dockerized application
 - `make compose-up-stage` - Run docker-compose and create stage services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana, Adventcalendar-backend)
 - `make compose-down-stage` - Stop docker-compose and remove stage services (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana, Adventcalendar-backend)
 - `make compose-ps-stage` - Show docker-compose stage processes (PostgreSQL, Redis, Rabbitmq, Prometheus, Grafana, Adventcalendar-backend)
