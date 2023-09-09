@@ -101,22 +101,6 @@ func GetDbSslMode() string {
 	return sslMode
 }
 
-func GetDbMaxIdleConns() int {
-	maxIdleConns := 0
-	if os.Getenv("DB_MAX_IDLE_CONNS") != "" {
-		maxIdleConns, _ = strconv.Atoi(os.Getenv("DB_MAX_IDLE_CONNS"))
-	}
-	return maxIdleConns
-}
-
-func GetDbMaxOpenConns() int {
-	maxOpenConns := 0
-	if os.Getenv("DB_MAX_OPEN_CONNS") != "" {
-		maxOpenConns, _ = strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNS"))
-	}
-	return maxOpenConns
-}
-
 func GetRedisHost() string {
 	host := "localhost"
 	if os.Getenv("REDIS_HOST") != "" {
