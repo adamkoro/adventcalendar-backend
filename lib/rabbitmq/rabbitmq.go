@@ -6,8 +6,9 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func ConnectToMq(username, password, host, port, vhost string) (*amqp.Connection, error) {
-	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s%s", username, password, host, port, vhost))
+func Connect(username, password, host, vhost string, port int) (*amqp.Connection, error) {
+	stringport := fmt.Sprintf("%d", port)
+	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s%s", username, password, host, stringport, vhost))
 	if err != nil {
 		return nil, err
 	}
