@@ -150,7 +150,7 @@ func GetRabbitmqPort() int {
 }
 
 func GetRabbitmqUser() string {
-	user := "guest"
+	user := "rabbitmq"
 	if os.Getenv("RABBITMQ_USER") != "" {
 		user = os.Getenv("RABBITMQ_USER")
 	}
@@ -158,7 +158,7 @@ func GetRabbitmqUser() string {
 }
 
 func GetRabbitmqPassword() string {
-	password := "guest"
+	password := "rabbitmq"
 	if os.Getenv("RABBITMQ_PASSWORD") != "" {
 		password = os.Getenv("RABBITMQ_PASSWORD")
 	}
