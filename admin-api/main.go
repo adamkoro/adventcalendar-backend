@@ -13,9 +13,11 @@ import (
 	endpoints "github.com/adamkoro/adventcalendar-backend/admin-api/api"
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	"github.com/adamkoro/adventcalendar-backend/lib/postgres"
+	mq "github.com/adamkoro/adventcalendar-backend/lib/rabbitmq"
 	rd "github.com/adamkoro/adventcalendar-backend/lib/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -25,6 +27,7 @@ var (
 	metricsPort  int
 	postgresConn *gorm.DB
 	redisConn    *redis.Client
+	rabbitmqConn *amqp.Connection
 )
 
 func main() {
@@ -84,6 +87,36 @@ func main() {
 				}
 			}
 			endpoints.Rd = redisConn
+			time.Sleep(5 * time.Second)
+		}
+	}()
+
+	// RabbitMQ connection check
+	go func() {
+		var isConnected bool
+		rabbitmqConn, err := createRabbitMqConnection()
+		if err != nil {
+			log.Println(err)
+		}
+		isConnected = true
+		log.Println("Connected to the rabbitmq.")
+		for {
+			pingConn, err := createRabbitMqConnection()
+			if err != nil {
+				log.Println("Lost connection to the rabbitmq, reconnecting...")
+				rabbitmqConn, err = createRabbitMqConnection()
+				if err != nil {
+					isConnected = false
+					log.Println("Failed to reconnect to the rabbitmq.")
+				}
+			} else {
+				if !isConnected {
+					log.Println("Reconnected to the rabbitmq.")
+					isConnected = true
+				}
+			}
+			mq.CloseConnection(pingConn)
+			endpoints.MqConn = rabbitmqConn
 			time.Sleep(5 * time.Second)
 		}
 	}()
@@ -186,4 +219,8 @@ func createPostgresConnection() (*gorm.DB, error) {
 
 func createRedisConnection() *redis.Client {
 	return rd.Connect(env.GetRedisHost(), env.GetRedisPort(), env.GetRedisPassword(), env.GetRedisDb())
+}
+
+func createRabbitMqConnection() (*amqp.Connection, error) {
+	return mq.Connect(env.GetRabbitmqUser(), env.GetRabbitmqPassword(), env.GetRabbitmqHost(), env.GetRabbitmqVhost(), env.GetRabbitmqPort())
 }
