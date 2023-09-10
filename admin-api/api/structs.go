@@ -36,3 +36,8 @@ type Session struct {
 	SourceIP string
 	LoginAt  string
 }
+
+type MqMessage struct {
+	QueueName string
+	Body      []byte
+}
