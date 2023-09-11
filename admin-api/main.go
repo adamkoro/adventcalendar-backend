@@ -92,7 +92,9 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
-	router.Use(CORSMiddleware())
+	if gin.Mode() == gin.DebugMode {
+		router.Use(CORSMiddleware())
+	}
 	api := router.Group("/api")
 	{
 		// Public endpoints
@@ -165,6 +167,7 @@ func main() {
 }
 
 func CORSMiddleware() gin.HandlerFunc {
+	log.Println("CORS enabled")
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3030")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
