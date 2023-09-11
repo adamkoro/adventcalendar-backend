@@ -1,7 +1,7 @@
 tidy:
 	go mod tidy
 run:
-	go run main.go
+	PORT=8082 METRICS_PORT=8083 go run main.go
 test:
 	go test -v ./...
 build:

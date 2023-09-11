@@ -28,6 +28,9 @@ var (
 )
 
 func main() {
+	httpPort = env.GetHttpPort()
+	metricsPort = env.GetMetricsPort()
+	endpoints.SecretKey = env.GetSecretKey()
 	// Redis connection check
 	go func() {
 		var isConnected bool
@@ -59,12 +62,12 @@ func main() {
 	go func() {
 		var isConnected bool
 		var queue amqp.Queue
-		rabbitmqConn, err := createRabbitMqConnection()
+		rabbitConn, err := createRabbitMqConnection()
 		if err != nil {
 			log.Println(err)
 		}
 		isConnected = true
-		channel, err := rabbitMQ.CreateChannel(rabbitmqConn)
+		channel, err := rabbitMQ.CreateChannel(rabbitConn)
 		if err != nil {
 			log.Println(err)
 		}
@@ -77,7 +80,7 @@ func main() {
 			pingConn, err := createRabbitMqConnection()
 			if err != nil {
 				log.Println("Lost connection to the rabbitmq, reconnecting...")
-				rabbitmqConn, err = createRabbitMqConnection()
+				rabbitConn, err = createRabbitMqConnection()
 				if err != nil {
 					isConnected = false
 					log.Println("Failed to reconnect to the rabbitmq.")
@@ -86,7 +89,7 @@ func main() {
 				if !isConnected {
 					log.Println("Reconnected to the rabbitmq.")
 					isConnected = true
-					channel, err := rabbitMQ.CreateChannel(rabbitmqConn)
+					channel, err := rabbitMQ.CreateChannel(rabbitConn)
 					if err != nil {
 						log.Println(err)
 					}
