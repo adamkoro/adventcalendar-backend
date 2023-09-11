@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	custModel "github.com/adamkoro/adventcalendar-backend/lib/model"
 	"github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -12,9 +13,9 @@ import (
 var Db *gorm.DB
 
 func CreateUser(c *gin.Context) {
-	var data CreateUserRequest
-	var errorresp ErrorResponse
-	var createuserresp SuccessResponse
+	var data custModel.CreateUserRequest
+	var errorresp custModel.ErrorResponse
+	var createuserresp custModel.SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON: " + err.Error()
@@ -38,9 +39,9 @@ func CreateUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	var data UserRequest
-	var errorresp ErrorResponse
-	var getuserresp UserResponse
+	var data custModel.UserRequest
+	var errorresp custModel.ErrorResponse
+	var getuserresp custModel.UserResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON: " + err.Error()
@@ -66,8 +67,8 @@ func GetUser(c *gin.Context) {
 }
 
 func GetAllUsers(c *gin.Context) {
-	var errorresp ErrorResponse
-	var getallusersresp []UserResponse
+	var errorresp custModel.ErrorResponse
+	var getallusersresp []custModel.UserResponse
 
 	users, err := postgres.GetAllUsers(Db)
 	if err != nil {
@@ -79,7 +80,7 @@ func GetAllUsers(c *gin.Context) {
 	}
 
 	for _, user := range users {
-		var userresp UserResponse
+		var userresp custModel.UserResponse
 		userresp.Id = int(user.Key)
 		userresp.Username = user.Username
 		userresp.Email = user.Email
@@ -91,9 +92,9 @@ func GetAllUsers(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	var data CreateUserRequest
-	var errorresp ErrorResponse
-	var updateuserresp SuccessResponse
+	var data custModel.CreateUserRequest
+	var errorresp custModel.ErrorResponse
+	var updateuserresp custModel.SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON: " + err.Error()
@@ -117,9 +118,9 @@ func UpdateUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-	var data UserRequest
-	var errorresp ErrorResponse
-	var deleteuserresp SuccessResponse
+	var data custModel.UserRequest
+	var errorresp custModel.ErrorResponse
+	var deleteuserresp custModel.SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON: " + err.Error()

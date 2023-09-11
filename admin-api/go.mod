@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/adamkoro/adventcalendar-backend/lib/env v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/jwt v0.0.0-00010101000000-000000000000
+	github.com/adamkoro/adventcalendar-backend/lib/model v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/postgres v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/redis v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.9.1
@@ -67,3 +68,5 @@ replace github.com/adamkoro/adventcalendar-backend/lib/redis => ../lib/redis
 replace github.com/adamkoro/adventcalendar-backend/lib/rabbitmq => ../lib/rabbitmq
 
 replace github.com/adamkoro/adventcalendar-backend/lib/jwt => ../lib/jwt
+
+replace github.com/adamkoro/adventcalendar-backend/lib/model => ../lib/model

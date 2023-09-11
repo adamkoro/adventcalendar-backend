@@ -8,6 +8,7 @@ import (
 	"time"
 
 	custJWT "github.com/adamkoro/adventcalendar-backend/lib/jwt"
+	custModel "github.com/adamkoro/adventcalendar-backend/lib/model"
 	"github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -20,12 +21,12 @@ var (
 )
 
 func Login(c *gin.Context) {
-	var data LoginRequest
+	var data custModel.LoginRequest
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -34,7 +35,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		errormessage := "Username or password incorrect"
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -43,7 +44,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error generating JWT: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
@@ -51,11 +52,11 @@ func Login(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error creating session: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	loginresp := SuccessResponse{Status: "Login successful"}
+	loginresp := custModel.SuccessResponse{Status: "Login successful"}
 	log.Println(loginresp.Status)
 	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, &loginresp)
@@ -66,7 +67,7 @@ func Logout(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error getting cookie: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -74,21 +75,21 @@ func Logout(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error validating JWT: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
 	if claims["authorized"] != true {
 		errormessage := "Unauthorized"
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
 	if claims["session"] == "" {
 		errormessage := "Session not found"
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -96,11 +97,11 @@ func Logout(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error deleting session from redis: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	logoutresp := SuccessResponse{Status: "Logout successful"}
+	logoutresp := custModel.SuccessResponse{Status: "Logout successful"}
 	log.Println(logoutresp.Status)
 	c.SetCookie("token", "", 0, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, &logoutresp)
@@ -111,7 +112,7 @@ func AuthRequired(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error getting cookie: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: "cookie not found"}
+		errorresp := custModel.ErrorResponse{Error: "cookie not found"}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -119,21 +120,21 @@ func AuthRequired(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error validating JWT: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
 	if claims["authorized"] != true {
 		errormessage := "Unauthorized"
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
 	if claims["session"] == "" {
 		errormessage := "Session not found"
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -141,23 +142,23 @@ func AuthRequired(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error getting session from redis: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	var tokenSession Session
+	var tokenSession custModel.Session
 	err = json.Unmarshal(backend_session, &tokenSession)
 	if err != nil {
 		errormessage := "Error unmarshalling session: " + err.Error()
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
 	if cookie != tokenSession.Token {
 		errormessage := "Session invalid"
 		log.Println(errormessage)
-		errorresp := ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -165,7 +166,7 @@ func AuthRequired(c *gin.Context) {
 }
 
 func createSession(rd *redis.Client, username string, token string, sourceIp string, session_uuid string) error {
-	session := Session{
+	session := custModel.Session{
 		Username: username,
 		Token:    token,
 		SourceIP: sourceIp,
