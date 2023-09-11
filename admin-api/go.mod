@@ -4,14 +4,12 @@ go 1.20
 
 require (
 	github.com/adamkoro/adventcalendar-backend/lib/env v0.0.0-00010101000000-000000000000
+	github.com/adamkoro/adventcalendar-backend/lib/jwt v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/postgres v0.0.0-00010101000000-000000000000
-	github.com/adamkoro/adventcalendar-backend/lib/rabbitmq v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/redis v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.9.1
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.1
 	github.com/prometheus/client_golang v1.16.0
-	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/redis/go-redis/v9 v9.1.0
 	gorm.io/gorm v1.25.4
 )
@@ -28,6 +26,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
@@ -66,3 +65,5 @@ replace github.com/adamkoro/adventcalendar-backend/lib/postgres => ../lib/postgr
 replace github.com/adamkoro/adventcalendar-backend/lib/redis => ../lib/redis
 
 replace github.com/adamkoro/adventcalendar-backend/lib/rabbitmq => ../lib/rabbitmq
+
+replace github.com/adamkoro/adventcalendar-backend/lib/jwt => ../lib/jwt
