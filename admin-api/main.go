@@ -13,10 +13,8 @@ import (
 	endpoints "github.com/adamkoro/adventcalendar-backend/admin-api/api"
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
-	rd "github.com/adamkoro/adventcalendar-backend/lib/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -93,7 +91,7 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
 	if gin.Mode() == gin.DebugMode {
-		router.Use(CORSMiddleware())
+		router.Use(endpoints.CORSMiddleware())
 	}
 	api := router.Group("/api")
 	{
@@ -166,27 +164,10 @@ func main() {
 	log.Println("Server exiting")
 }
 
-func CORSMiddleware() gin.HandlerFunc {
-	log.Println("CORS enabled")
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3030")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, Access-Control-Allow-Credentials")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-
-		c.Next()
-	}
-}
-
 func createPostgresConnection() (*gorm.DB, error) {
 	return db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
 }
 
-func createRedisConnection() *redis.Client {
+/*func createRedisConnection() *redis.Client {
 	return rd.Connect(env.GetRedisHost(), env.GetRedisPort(), env.GetRedisPassword(), env.GetRedisDb())
-}
+}*/
