@@ -17,7 +17,7 @@ func init() {
 }
 
 func TestGenerateJWT(t *testing.T) {
-	token, err = jwt.GenerateJWT("test", "test", secretKey)
+	token, err = jwt.GenerateJWT("test", secretKey)
 	if err != nil {
 		t.Errorf("Failed to generate JWT: %v", err)
 	}
@@ -27,7 +27,7 @@ func TestGenerateJWT(t *testing.T) {
 }
 
 func TestValidateJWT(t *testing.T) {
-	token, _ = jwt.GenerateJWT("test", "test", secretKey)
+	token, _ = jwt.GenerateJWT("test", secretKey)
 	claims, err := jwt.ValidateJWT(token, secretKey)
 	if err != nil {
 		t.Errorf("Failed to validate JWT: %v", err)
