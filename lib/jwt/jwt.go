@@ -4,31 +4,26 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
-var (
-	SecretKey string
-)
-
-func GenerateJWT(username string, session string) (string, error) {
+func GenerateJWT(username string, session string, secretKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"exp":        time.Now().Add(86400 * time.Second).Unix(),
 		"authorized": true,
 		"user":       username,
 		"session":    session,
 	})
-	signToken, err := token.SignedString([]byte(SecretKey))
+	signToken, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err
 	}
 	return signToken, nil
 }
 
-func ValidateJWT(tokenString string, c *gin.Context) (jwt.MapClaims, error) {
+func ValidateJWT(tokenString string, secretKey string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
 		return nil, err
