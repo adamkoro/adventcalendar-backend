@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	custJWT "github.com/adamkoro/adventcalendar-backend/lib/jwt"
 	custModel "github.com/adamkoro/adventcalendar-backend/lib/model"
 	"github.com/adamkoro/adventcalendar-backend/lib/postgres"
@@ -40,7 +41,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	session_uuid := uuid.New().String()
-	token, err := custJWT.GenerateJWT(data.Username, session_uuid)
+	token, err := custJWT.GenerateJWT(data.Username, session_uuid, env.GetSecretKey())
 	if err != nil {
 		errormessage := "Error generating JWT: " + err.Error()
 		log.Println(errormessage)
@@ -71,7 +72,7 @@ func Logout(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
-	claims, err := custJWT.ValidateJWT(cookie, c)
+	claims, err := custJWT.ValidateJWT(cookie, env.GetAdminEmail())
 	if err != nil {
 		errormessage := "Error validating JWT: " + err.Error()
 		log.Println(errormessage)
@@ -116,7 +117,7 @@ func AuthRequired(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
-	claims, err := custJWT.ValidateJWT(cookie, c)
+	claims, err := custJWT.ValidateJWT(cookie, env.GetSecretKey())
 	if err != nil {
 		errormessage := "Error validating JWT: " + err.Error()
 		log.Println(errormessage)
