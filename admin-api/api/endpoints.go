@@ -27,15 +27,15 @@ func Login(c *gin.Context) {
 	err := Db.Login(data.Username, data.Password)
 	if err != nil {
 		errormessage := "Username or password incorrect"
-		log.Println(errormessage)
+		log.Println(errormessage+" : ", err.Error())
 		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
 	token, err := custJWT.GenerateJWT(data.Username, env.GetSecretKey())
 	if err != nil {
-		errormessage := "Error generating JWT: " + err.Error()
-		log.Println(errormessage)
+		errormessage := "Error generating JWT token"
+		log.Println(errormessage+" : ", err.Error())
 		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
@@ -49,32 +49,18 @@ func Login(c *gin.Context) {
 func Logout(c *gin.Context) {
 	cookie, err := c.Cookie("token")
 	if err != nil {
-		errormessage := "Error getting cookie: " + err.Error()
-		log.Println(errormessage)
+		errormessage := "Error getting cookie"
+		log.Println(errormessage+" : ", err.Error())
 		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
-	claims, err := custJWT.ValidateJWT(cookie, env.GetAdminEmail())
+	_, err = custJWT.ValidateJWT(cookie, env.GetSecretKey())
 	if err != nil {
-		errormessage := "Error validating JWT: " + err.Error()
-		log.Println(errormessage)
+		errormessage := "Error validating JWT token"
+		log.Println(errormessage+" : ", err.Error())
 		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusBadRequest, &errorresp)
-		return
-	}
-	if claims["authorized"] != true {
-		errormessage := "Unauthorized"
-		log.Println(errormessage)
-		errorresp := custModel.ErrorResponse{Error: errormessage}
-		c.JSON(http.StatusUnauthorized, &errorresp)
-		return
-	}
-	if claims["session"] == "" {
-		errormessage := "Session not found"
-		log.Println(errormessage)
-		errorresp := custModel.ErrorResponse{Error: errormessage}
-		c.JSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
 	logoutresp := custModel.SuccessResponse{Status: "Logout successful"}
@@ -85,52 +71,50 @@ func Logout(c *gin.Context) {
 
 func CreateUser(c *gin.Context) {
 	var data custModel.CreateUserRequest
-	var errorresp custModel.ErrorResponse
-	var createuserresp custModel.SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
-		errormessage := "Error binding JSON: " + err.Error()
-		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errormessage := "Error binding JSON"
+		log.Println(errormessage+" : ", err.Error())
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
 
 	err := Db.CreateUser(data.Username, data.Email, data.Password)
 	if err != nil {
-		errormessage := "Error while creating user: " + err.Error()
-		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errormessage := "Error while creating user"
+		log.Println(errormessage+" : ", err.Error())
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	createuserresp.Status = "User created"
+	createuserresp := custModel.SuccessResponse{Status: "User created"}
 	log.Println(createuserresp.Status)
 	c.JSON(http.StatusOK, &createuserresp)
 }
 
 func GetUser(c *gin.Context) {
 	var data custModel.UserRequest
-	var errorresp custModel.ErrorResponse
 	var getuserresp custModel.UserResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
-		errormessage := "Error binding JSON: " + err.Error()
-		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errormessage := "Error binding JSON"
+		log.Println(errormessage+" : ", err.Error())
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
 
 	user, err := Db.GetUser(data.Username)
 	if err != nil {
-		errormessage := "Error while getting user: " + err.Error()
-		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errormessage := "Error while getting user"
+		log.Println(errormessage+" : ", err.Error())
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	getuserresp.Username = user.Username
+
+	getuserresp.Id = int(user.Key)
 	getuserresp.Email = user.Email
 	getuserresp.Created = user.CreatedAt.String()
 	getuserresp.Modified = user.ModifiedAt.String()
@@ -138,14 +122,13 @@ func GetUser(c *gin.Context) {
 }
 
 func GetAllUsers(c *gin.Context) {
-	var errorresp custModel.ErrorResponse
 	var getallusersresp []custModel.UserResponse
 
 	users, err := Db.GetAllUsers()
 	if err != nil {
-		errormessage := "Error while getting all users: " + err.Error()
-		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errormessage := "Error while getting all users"
+		log.Println(errormessage+" : ", err.Error())
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
@@ -163,23 +146,22 @@ func GetAllUsers(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	var data custModel.CreateUserRequest
-	var errorresp custModel.ErrorResponse
+	var data custModel.UpdateUserRequest
 	var updateuserresp custModel.SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
-		errormessage := "Error binding JSON: " + err.Error()
-		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errormessage := "Error binding JSON to struct"
+		log.Println(errormessage + ":" + err.Error())
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
 
 	err := Db.UpdateUser(data.Username, data.Email, data.Password)
 	if err != nil {
-		errormessage := "Error while updating user: " + err.Error()
-		log.Println(errormessage)
-		errorresp.Error = errormessage
+		errormessage := "Error while updating user"
+		log.Println(errormessage + ":" + err.Error())
+		errorresp := custModel.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
@@ -194,8 +176,8 @@ func DeleteUser(c *gin.Context) {
 	var deleteuserresp custModel.SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
-		errormessage := "Error binding JSON: " + err.Error()
-		log.Println(errormessage)
+		errormessage := "Error binding JSON to struct"
+		log.Println(errormessage + ":" + err.Error())
 		errorresp.Error = errormessage
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
@@ -209,8 +191,8 @@ func DeleteUser(c *gin.Context) {
 	}
 	err := Db.DeleteUser(data.Username)
 	if err != nil {
-		errormessage := "Error while deleting user: " + err.Error()
-		log.Println(errormessage)
+		errormessage := "Error while deleting user"
+		log.Println(errormessage + ":" + err.Error())
 		errorresp.Error = errormessage
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
