@@ -12,7 +12,7 @@ import (
 
 	endpoints "github.com/adamkoro/adventcalendar-backend/admin-api/api"
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
-	"github.com/adamkoro/adventcalendar-backend/lib/postgres"
+	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	rd "github.com/adamkoro/adventcalendar-backend/lib/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -21,10 +21,10 @@ import (
 )
 
 var (
-	httpPort     int
-	metricsPort  int
-	postgresConn *gorm.DB
-	redisConn    *redis.Client
+	httpPort    int
+	metricsPort int
+	db          pg.Repository
+	//redisConn   *redis.Client
 )
 
 func main() {
@@ -34,16 +34,18 @@ func main() {
 	go func() {
 		var isConnected bool
 		postgresConn, err := createPostgresConnection()
+		db := pg.NewRepository(postgresConn)
 		if err != nil {
 			log.Println(err)
 		}
 		isConnected = true
 		log.Println("Connected to the postgres.")
 		for {
-			err := postgres.Ping(postgresConn)
+			err := db.Ping()
 			if err != nil {
 				log.Println("Lost connection to the postgres, reconnecting...")
-				postgresConn, err = createPostgresConnection()
+				postgresConn, err := createPostgresConnection()
+				db = pg.NewRepository(postgresConn)
 				if err != nil {
 					isConnected = false
 					log.Println("Failed to reconnect to the postgres.")
@@ -54,13 +56,13 @@ func main() {
 					isConnected = true
 				}
 			}
-			endpoints.Db = postgresConn
+			endpoints.Db = *db
 			time.Sleep(5 * time.Second)
 		}
 	}()
 
 	// Redis connection check
-	go func() {
+	/*go func() {
 		var isConnected bool
 		redisConn = createRedisConnection()
 		if redisConn != nil {
@@ -82,10 +84,9 @@ func main() {
 					isConnected = true
 				}
 			}
-			endpoints.Rd = redisConn
 			time.Sleep(5 * time.Second)
 		}
-	}()
+	}()*/
 
 	// Api server
 	router := gin.New()
@@ -183,7 +184,7 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 func createPostgresConnection() (*gorm.DB, error) {
-	return postgres.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
+	return db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
 }
 
 func createRedisConnection() *redis.Client {

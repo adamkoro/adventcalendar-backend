@@ -4,13 +4,84 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/adamkoro/adventcalendar-backend/lib/env"
+	custJWT "github.com/adamkoro/adventcalendar-backend/lib/jwt"
 	custModel "github.com/adamkoro/adventcalendar-backend/lib/model"
-	"github.com/adamkoro/adventcalendar-backend/lib/postgres"
+	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-var Db *gorm.DB
+var Db pg.Repository
+
+func Login(c *gin.Context) {
+	var data custModel.LoginRequest
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		errormessage := "Error binding JSON: " + err.Error()
+		log.Println(errormessage)
+		errorresp := custModel.ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusBadRequest, &errorresp)
+		return
+	}
+
+	err := Db.Login(data.Username, data.Password)
+	if err != nil {
+		errormessage := "Username or password incorrect"
+		log.Println(errormessage)
+		errorresp := custModel.ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
+	token, err := custJWT.GenerateJWT(data.Username, env.GetSecretKey())
+	if err != nil {
+		errormessage := "Error generating JWT: " + err.Error()
+		log.Println(errormessage)
+		errorresp := custModel.ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusInternalServerError, &errorresp)
+		return
+	}
+	loginresp := custModel.SuccessResponse{Status: "Login successful"}
+	log.Println(loginresp.Status)
+	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
+	c.JSON(http.StatusOK, &loginresp)
+}
+
+func Logout(c *gin.Context) {
+	cookie, err := c.Cookie("token")
+	if err != nil {
+		errormessage := "Error getting cookie: " + err.Error()
+		log.Println(errormessage)
+		errorresp := custModel.ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusBadRequest, &errorresp)
+		return
+	}
+	claims, err := custJWT.ValidateJWT(cookie, env.GetAdminEmail())
+	if err != nil {
+		errormessage := "Error validating JWT: " + err.Error()
+		log.Println(errormessage)
+		errorresp := custModel.ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusBadRequest, &errorresp)
+		return
+	}
+	if claims["authorized"] != true {
+		errormessage := "Unauthorized"
+		log.Println(errormessage)
+		errorresp := custModel.ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
+	if claims["session"] == "" {
+		errormessage := "Session not found"
+		log.Println(errormessage)
+		errorresp := custModel.ErrorResponse{Error: errormessage}
+		c.JSON(http.StatusUnauthorized, &errorresp)
+		return
+	}
+	logoutresp := custModel.SuccessResponse{Status: "Logout successful"}
+	log.Println(logoutresp.Status)
+	c.SetCookie("token", "", 0, "/", "localhost", false, true)
+	c.JSON(http.StatusOK, &logoutresp)
+}
 
 func CreateUser(c *gin.Context) {
 	var data custModel.CreateUserRequest
@@ -25,7 +96,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	err := postgres.CreateUser(Db, data.Username, data.Email, data.Password)
+	err := Db.CreateUser(data.Username, data.Email, data.Password)
 	if err != nil {
 		errormessage := "Error while creating user: " + err.Error()
 		log.Println(errormessage)
@@ -51,7 +122,7 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := postgres.GetUser(Db, data.Username)
+	user, err := Db.GetUser(data.Username)
 	if err != nil {
 		errormessage := "Error while getting user: " + err.Error()
 		log.Println(errormessage)
@@ -70,7 +141,7 @@ func GetAllUsers(c *gin.Context) {
 	var errorresp custModel.ErrorResponse
 	var getallusersresp []custModel.UserResponse
 
-	users, err := postgres.GetAllUsers(Db)
+	users, err := Db.GetAllUsers()
 	if err != nil {
 		errormessage := "Error while getting all users: " + err.Error()
 		log.Println(errormessage)
@@ -104,7 +175,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	err := postgres.UpdateUser(Db, data.Username, data.Email, data.Password)
+	err := Db.UpdateUser(data.Username, data.Email, data.Password)
 	if err != nil {
 		errormessage := "Error while updating user: " + err.Error()
 		log.Println(errormessage)
@@ -136,7 +207,7 @@ func DeleteUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
-	err := postgres.DeleteUser(Db, data.Username)
+	err := Db.DeleteUser(data.Username)
 	if err != nil {
 		errormessage := "Error while deleting user: " + err.Error()
 		log.Println(errormessage)
