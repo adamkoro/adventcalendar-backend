@@ -1,6 +1,10 @@
 package postgres
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
 	Key        uint      `gorm:"primaryKey"`
@@ -9,4 +13,8 @@ type User struct {
 	Password   string    `gorm:"type:varchar(255);not null"`
 	CreatedAt  time.Time `gorm:"autoCreateTime"`
 	ModifiedAt time.Time `gorm:"autoUpdateTime"`
+}
+
+type Repository struct {
+	db *gorm.DB
 }

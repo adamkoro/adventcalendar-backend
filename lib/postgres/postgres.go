@@ -8,93 +8,99 @@ import (
 	"gorm.io/gorm"
 )
 
-func hashPassword(password string) (string, error) {
+func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
-func checkPasswordHash(password, hash string) error {
+func CheckPasswordHash(password, hash string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err
 }
 
-func Connect(dbHost string, dbUser string, dbPassword string, dbName string, dbPort int, sslmode string) (*gorm.DB, error) {
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{
+		db: db,
+	}
+}
+
+func (r *Repository) Connect(dbHost string, dbUser string, dbPassword string, dbName string, dbPort int, sslmode string) (*gorm.DB, error) {
 	dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPassword + " dbname=" + dbName + " port=" + strconv.Itoa(dbPort) + " sslmode=" + sslmode
 	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
 }
 
-func Migrate(db *gorm.DB) error {
-	return db.AutoMigrate(&User{})
+func (r *Repository) Migrate() error {
+	return r.db.AutoMigrate(&User{})
 }
 
-func Close(db *gorm.DB) error {
-	sqlDB, err := db.DB()
+func (r *Repository) Close() error {
+	sqlDB, err := r.db.DB()
 	if err != nil {
 		return err
 	}
 	return sqlDB.Close()
 }
 
-func CreateUser(db *gorm.DB, username string, email string, password string) error {
-	hashpass, err := hashPassword(password)
+func (r *Repository) CreateUser(username string, email string, password string) error {
+	hashpass, err := HashPassword(password)
 	if err != nil {
 		return err
 	}
-	return db.Create(&User{Username: username, Email: email, Password: hashpass}).Error
+	return r.db.Create(&User{Username: username, Email: email, Password: hashpass}).Error
 }
 
-func GetUser(db *gorm.DB, username string) (*User, error) {
+func (r *Repository) GetUser(username string) (*User, error) {
 	user := &User{}
-	err := db.Where("username = ?", username).First(user).Error
+	err := r.db.Where("username = ?", username).First(user).Error
 	return user, err
 }
 
-func Login(db *gorm.DB, username string, password string) error {
+func (r *Repository) Login(username string, password string) error {
 	user := &User{}
-	err := db.Where("username = ?", username).First(user).Error
+	err := r.db.Where("username = ?", username).First(user).Error
 	if err != nil {
 		return err
 	}
-	err = checkPasswordHash(password, user.Password)
+	err = CheckPasswordHash(password, user.Password)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteUser(db *gorm.DB, username string) error {
-	return db.Where("username = ?", username).Delete(&User{}).Error
+func (r *Repository) DeleteUser(username string) error {
+	return r.db.Where("username = ?", username).Delete(&User{}).Error
 }
 
-func UpdateUser(db *gorm.DB, username string, email string, password string) error {
-	hashpass, err := hashPassword(password)
+func (r *Repository) UpdateUser(username string, email string, password string) error {
+	hashpass, err := HashPassword(password)
 	if err != nil {
 		return err
 	}
-	return db.Model(&User{}).Where("username = ?", username).Updates(User{Email: email, Password: hashpass}).Error
+	return r.db.Model(&User{}).Where("username = ?", username).Updates(User{Email: email, Password: hashpass}).Error
 }
 
-func GetAllUsers(db *gorm.DB) ([]User, error) {
+func (r *Repository) GetAllUsers() ([]User, error) {
 	var users []User
-	err := db.Find(&users).Error
+	err := r.db.Find(&users).Error
 	return users, err
 }
 
-func Ping(db *gorm.DB) error {
-	sqlDB, err := db.DB()
+func (r *Repository) Ping() error {
+	sqlDB, err := r.db.DB()
 	if err != nil {
 		return err
 	}
 	return sqlDB.Ping()
 }
 
-func CheckUserPassword(db *gorm.DB, username string, password string) error {
+func (r *Repository) CheckUserPassword(username string, password string) error {
 	user := &User{}
-	err := db.Where("username = ?", username).First(user).Error
+	err := r.db.Where("username = ?", username).First(user).Error
 	if err != nil {
 		return err
 	}
-	err = checkPasswordHash(password, user.Password)
+	err = CheckPasswordHash(password, user.Password)
 	if err != nil {
 		return err
 	}
