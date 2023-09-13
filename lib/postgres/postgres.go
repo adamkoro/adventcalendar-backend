@@ -72,10 +72,17 @@ func (r *Repository) DeleteUser(username string) error {
 	return r.db.Where("username = ?", username).Delete(&User{}).Error
 }
 
-func (r *Repository) UpdateUser(username string, email string, password string) error {
+func (r *Repository) UpdateUser(username, email, password string) error {
 	hashpass, err := HashPassword(password)
 	if err != nil {
 		return err
+	}
+
+	if email == "" {
+		return r.db.Model(&User{}).Where("username = ?", username).Updates(User{Password: hashpass}).Error
+	}
+	if password == "" {
+		return r.db.Model(&User{}).Where("username = ?", username).Updates(User{Email: email}).Error
 	}
 	return r.db.Model(&User{}).Where("username = ?", username).Updates(User{Email: email, Password: hashpass}).Error
 }
