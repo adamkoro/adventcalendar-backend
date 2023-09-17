@@ -43,7 +43,8 @@ type Session struct {
 	LoginAt  string
 }
 
-type MqMessage struct {
-	QueueName string
-	Body      []byte
+type MQMessage struct {
+	EmailTo string `json:"emailto"`
+	Subject string `json:"subject"`
+	Message string `json:"message"`
 }
