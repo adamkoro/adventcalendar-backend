@@ -30,48 +30,20 @@ var (
 func main() {
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
-	endpoints.SecretKey = env.GetSecretKey()
-	// Redis connection check
-	go func() {
-		var isConnected bool
-		redisConn = createRedisConnection()
-		if redisConn != nil {
-			isConnected = true
-			log.Println("Connected to the redis.")
-		}
-		for {
-			err := rd.Ping(redisConn)
-			if err != nil {
-				log.Println("Lost connection to the redis, reconnecting...")
-				redisConn = createRedisConnection()
-				if err != nil {
-					isConnected = false
-					log.Println("Failed to reconnect to the redis.")
-				}
-			} else {
-				if !isConnected {
-					log.Println("Reconnected to the redis.")
-					isConnected = true
-				}
-			}
-			endpoints.Rd = redisConn
-			time.Sleep(5 * time.Second)
-		}
-	}()
 	// RabbitMQ connection check
 	go func() {
 		var isConnected bool
-		var queue amqp.Queue
+		var channel *amqp.Channel
 		rabbitConn, err := createRabbitMqConnection()
 		if err != nil {
 			log.Println(err)
 		}
 		isConnected = true
-		channel, err := rabbitMQ.CreateChannel(rabbitConn)
+		channel, err = rabbitMQ.CreateChannel(rabbitConn)
 		if err != nil {
 			log.Println(err)
 		}
-		queue, err = rabbitMQ.DeclareQueue(channel, "email")
+		err = rabbitMQ.CreateExchange(channel, "email")
 		if err != nil {
 			log.Println(err)
 		}
@@ -93,17 +65,15 @@ func main() {
 					if err != nil {
 						log.Println(err)
 					}
-					queue, err = rabbitMQ.DeclareQueue(channel, "email")
-					if err != nil {
-						log.Println(err)
-					}
+					endpoints.MqChannel = channel
 				}
 			}
 			rabbitMQ.CloseConnection(pingConn)
-			endpoints.MqQueue = queue
+			endpoints.MqChannel = channel
 			time.Sleep(5 * time.Second)
 		}
 	}()
+
 	// Api server
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -121,7 +91,7 @@ func main() {
 		admin.Use(endpoints.AuthRequired)
 		{
 			admin.GET("/email", nil)
-			admin.POST("/email", nil)
+			admin.POST("/email", endpoints.SendMessageToRabbitMQ)
 			admin.PUT("/email", nil)
 			admin.DELETE("/email", nil)
 		}
