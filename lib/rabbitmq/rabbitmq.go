@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"context"
 	"fmt"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -44,4 +45,31 @@ func DeclareQueue(ch *amqp.Channel, chName string) (amqp.Queue, error) {
 		return q, err
 	}
 	return q, nil
+}
+
+func CreateExchange(ch *amqp.Channel, exName string) error {
+	err := ch.ExchangeDeclare(
+		exName,
+		"direct",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Publish(ch *amqp.Channel, exchangeName string, body []byte) error {
+	err := ch.PublishWithContext(context.Background(), "exchangeName", "direct", false, false, amqp.Publishing{
+		ContentType: "application/json",
+		Body:        body,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
