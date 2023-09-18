@@ -101,7 +101,7 @@ cd admin-api && make run
 ### Access to application
 - `http://localhost:8080` - Application
 - `http://localhost:8081` - Prometheus metrics
-## Api endpoints
+## Admin Api endpoints
 **TODO**: Swagger documentation
 ### Public endpoints
 - `GET /api/ping`
@@ -131,3 +131,26 @@ Based on JWT(Json Web Token) authentication. Before using private endpoints, you
   - Payload (example): `{"username": "testuser1"}`
 - `GET /api/admin/users` 
   - Get all users
+
+## Email Api endpoints
+**TODO**: Swagger documentation
+### Public endpoints
+- `GET /api/ping`
+  - Health check
+
+### Private endpoints - Authentication required
+Authentication is required for all endpoints below.
+Based on JWT(Json Web Token) authentication. Before using private endpoints, you need to get JWT token from `/api/login` endpoint.
+
+- `GET /api/admin/email` 
+  - Get all email patterns
+- `POST /api/admin/customemail`
+  - Create custom email, which is template for email and automatically send to RabbitMQ
+  - Payload (example): `{"emailto": "yourname@gmail.com", "subject": "Test subject", "body": "Test body"}`
+- `POST /api/admin/email`
+  - Create email pattern, which is stored in database 
+- `PUT /api/admin/email`
+  - Update email pattern
+- `DELETE /api/admin/email`
+  - Delete email
+  - Payload (example): `{"name": customname}` 
