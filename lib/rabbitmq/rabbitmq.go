@@ -57,3 +57,19 @@ func Publish(ch *amqp.Channel, queueName string, body []byte) error {
 	}
 	return nil
 }
+
+func Consume(ch *amqp.Channel, queueName string) (<-chan amqp.Delivery, error) {
+	msgs, err := ch.Consume(
+		queueName,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return msgs, err
+	}
+	return msgs, nil
+}
