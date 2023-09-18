@@ -70,7 +70,7 @@ func GetDbPort() int {
 }
 
 func GetDbUser() string {
-	user := "postgres"
+	user := "adventcalendar"
 	if os.Getenv("DB_USER") != "" {
 		user = os.Getenv("DB_USER")
 	}
@@ -78,7 +78,7 @@ func GetDbUser() string {
 }
 
 func GetDbPassword() string {
-	password := "postgres"
+	password := "adventcalendar"
 	if os.Getenv("DB_PASSWORD") != "" {
 		password = os.Getenv("DB_PASSWORD")
 	}
