@@ -147,8 +147,12 @@ Based on JWT(Json Web Token) authentication. Before using private endpoints, you
 - `POST /api/admin/customemail`
   - Create custom email, which is template for email and automatically send to RabbitMQ
   - Payload (example): `{"emailto": "yourname@gmail.com", "subject": "Test subject", "body": "Test body"}`
+- `POST /api/admin/sendemail`
+  - Send email to RabbitMQ, which is stored in database
+  - Payload (example): `{"name": "customemailpattern"}`
 - `POST /api/admin/email`
   - Create email pattern, which is stored in database 
+  - Payload (example): `{"name": "name": "customemailpattern", "from": "instace1@localhost", "to": "weblist@localhost", "subject": "Test subject", "body": "Test body"}`
 - `PUT /api/admin/email`
   - Update email pattern
 - `DELETE /api/admin/email`
