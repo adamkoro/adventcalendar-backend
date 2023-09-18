@@ -12,19 +12,19 @@ import (
 
 	endpoints "github.com/adamkoro/adventcalendar-backend/email-api/publisher/api"
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
+	md "github.com/adamkoro/adventcalendar-backend/lib/mariadb"
 	rabbitMQ "github.com/adamkoro/adventcalendar-backend/lib/rabbitmq"
-	rd "github.com/adamkoro/adventcalendar-backend/lib/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 var (
 	httpPort    int
 	metricsPort int
-	redisConn   *redis.Client
 	rabbitConn  *amqp.Connection
+	db          md.Repository
 )
 
 func main() {
@@ -79,7 +79,36 @@ func main() {
 			time.Sleep(5 * time.Second)
 		}*/
 	}()
-
+	// MariaDB connection check
+	go func() {
+		var isConnected bool
+		mariadbConn, err := createMariaDbConnection()
+		db := md.NewRepository(mariadbConn)
+		if err != nil {
+			log.Println(err)
+		}
+		isConnected = true
+		log.Println("Connected to the mariadb.")
+		for {
+			err := db.Ping()
+			if err != nil {
+				log.Println("Lost connection to the mariadb, reconnecting...")
+				mariadbConn, err := createMariaDbConnection()
+				db = md.NewRepository(mariadbConn)
+				if err != nil {
+					isConnected = false
+					log.Println("Failed to reconnect to the mariadb.")
+				}
+			} else {
+				if !isConnected {
+					log.Println("Reconnected to the mariadb.")
+					isConnected = true
+				}
+			}
+			endpoints.Db = *db
+			time.Sleep(5 * time.Second)
+		}
+	}()
 	// Api server
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -96,10 +125,11 @@ func main() {
 		admin := api.Group("/admin")
 		admin.Use(endpoints.AuthRequired)
 		{
-			admin.GET("/email", nil)
-			admin.POST("/email", endpoints.SendMessageToRabbitMQ)
+			admin.GET("/email", endpoints.GetEmails)
+			admin.POST("/email", endpoints.EmailSend)
+			admin.POST("/customemail", endpoints.CustomEmailSend)
 			admin.PUT("/email", nil)
-			admin.DELETE("/email", nil)
+			admin.DELETE("/email", endpoints.DeleteEmail)
 		}
 	}
 	api_server := &http.Server{
@@ -151,10 +181,10 @@ func main() {
 	log.Println("Server exiting")
 }
 
-func createRedisConnection() *redis.Client {
-	return rd.Connect(env.GetRedisHost(), env.GetRedisPort(), env.GetRedisPassword(), env.GetRedisDb())
-}
-
 func createRabbitMqConnection() (*amqp.Connection, error) {
 	return rabbitMQ.Connect(env.GetRabbitmqUser(), env.GetRabbitmqPassword(), env.GetRabbitmqHost(), env.GetRabbitmqVhost(), env.GetRabbitmqPort())
+}
+
+func createMariaDbConnection() (*gorm.DB, error) {
+	return db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort())
 }
