@@ -32,9 +32,9 @@ func CloseConnection(conn *amqp.Connection) {
 	defer conn.Close()
 }
 
-func DeclareQueue(ch *amqp.Channel, chName string) (amqp.Queue, error) {
+func DeclareQueue(ch *amqp.Channel, name string) (amqp.Queue, error) {
 	q, err := ch.QueueDeclare(
-		chName,
+		name,
 		true,
 		false,
 		false,
@@ -47,24 +47,8 @@ func DeclareQueue(ch *amqp.Channel, chName string) (amqp.Queue, error) {
 	return q, nil
 }
 
-func CreateExchange(ch *amqp.Channel, exName string) error {
-	err := ch.ExchangeDeclare(
-		exName,
-		"direct",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func Publish(ch *amqp.Channel, exchangeName string, body []byte) error {
-	err := ch.PublishWithContext(context.Background(), "exchangeName", "direct", false, false, amqp.Publishing{
+func Publish(ch *amqp.Channel, queueName string, body []byte) error {
+	err := ch.PublishWithContext(context.Background(), "", queueName, false, false, amqp.Publishing{
 		ContentType: "application/json",
 		Body:        body,
 	})
