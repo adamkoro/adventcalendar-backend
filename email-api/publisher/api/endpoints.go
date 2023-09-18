@@ -78,3 +78,17 @@ func GetEmails(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, emails)
 }
+
+func CreateEmail(c *gin.Context) {
+	var email db.Email
+	if err := c.ShouldBindJSON(&email); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := Db.CreateEmail(&email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Email created."})
+}
