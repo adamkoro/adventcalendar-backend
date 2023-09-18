@@ -126,10 +126,11 @@ func main() {
 		admin.Use(endpoints.AuthRequired)
 		{
 			admin.GET("/email", endpoints.GetEmails)
-			admin.POST("/email", endpoints.EmailSend)
-			admin.POST("/customemail", endpoints.CustomEmailSend)
+			admin.POST("/email", endpoints.CreateEmail)
 			admin.PUT("/email", nil)
 			admin.DELETE("/email", endpoints.DeleteEmail)
+			admin.POST("/sendemail", endpoints.EmailSend)
+			admin.POST("/customemail", endpoints.CustomEmailSend)
 		}
 	}
 	api_server := &http.Server{
