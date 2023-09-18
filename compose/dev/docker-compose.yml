@@ -7,8 +7,8 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: adventcalendar
+      POSTGRES_PASSWORD: adventcalendar
       POSTGRES_DB: adventcalendar
   # RabbitMQ
   dev-rabbitmq:
@@ -46,6 +46,16 @@ services:
     #volumes:
     #  - ./grafana/provisioning:/etc/grafana/provisioning
     #  - ./grafana/dashboards:/var/lib/grafana/dashboards
+  dev-mariadb:
+    image: docker.io/mariadb:11.1.2-jammy
+    container_name: dev-mariadb
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: adventcalendar
+      MYSQL_USER: adventcalendar
+      MYSQL_PASSWORD: adventcalendar
 networks:
   default:
     name: dev-adventcalendar
