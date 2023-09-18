@@ -11,27 +11,55 @@
 - Rabbitmq
 
 ## Environment variables
-- `SECRET_KEY` - Secret key for JWT token (default: `secret`)
+
+### Admin-api Init
+- `DB_HOST` - PostgreSQL host (default: `localhost`)
+- `DB_PORT` - PostgreSQL port (default: `5432`)
+- `DB_USER` - PostgreSQL user (default: `adventcalendar`)
+- `DB_PASSWORD` - PostgreSQL password (default: `adventcalendar`)
+- `DB_NAME` - PostgreSQL database name (default: `adventcalendar`)
+- `DB_SSL_MODE` - PostgreSQL ssl mode (default: `disable`)
 - `ADMIN_USERNAME` - Admin username (default: `admin`)
 - `ADMIN_EMAIL` - Admin email (default: `admin@admin.local`)
 - `ADMIN_PASSWORD` - Admin password (default: `admin`)
+### Admin-api
+**Admin-api Init environment variables are required**
+- `SECRET_KEY` - Secret key for JWT token (default: `secret`)
 - `PORT` - Api port (default: `8080`)
 - `METRICS_PORT` - Api metrics port (default: `8081`)
-- `DB_HOST` - PostgreSQL host (default: `localhost`)
-- `DB_PORT` - PostgreSQL port (default: `5432`)
-- `DB_USER` - PostgreSQL user (default: `postgres`)
-- `DB_PASSWORD` - PostgreSQL password (default: `postgres`)
-- `DB_NAME` - PostgreSQL database name (default: `postgres`)
-- `DB_SSL_MODE` - PostgreSQL ssl mode (default: `disable`)
 - `REDIS_HOST` - Redis host (default: `localhost`)
 - `REDIS_PORT` - Redis port (default: `6379`)
 - `REDIS_PASSWORD` - Redis password (default: `""`)
 - `REDIS_DB` - Redis database (default: `0`)
+
+### Email-api Publisher Init
+- `DB_HOST` - MariaDB host (default: `localhost`)
+- `DB_PORT` - MariaDB port (default: `3306`)
+- `DB_USER` - MariaDB user (default: `adventcalendar`)
+- `DB_PASSWORD` - MariaDB password (default: `adventcalendar`)
+- `DB_NAME` - MariaDB database name (default: `adventcalendar`)
+### Email-api Publisher
+**Email-api Publisher Init environment variables are required**
+- `PORT` - Api port (default: `8080`)
+- `METRICS_PORT` - Api metrics port (default: `8081`)
 - `RABBITMQ_HOST` - Rabbitmq host (default: `localhost`)
 - `RABBITMQ_PORT` - Rabbitmq port (default: `5672`)
 - `RABBITMQ_USER` - Rabbitmq user (default: `guest`)
 - `RABBITMQ_PASSWORD` - Rabbitmq password (default: `guest`)
 - `RABBITMQ_VHOST` - Rabbitmq vhost (default: `/`)
+### Email-api Consumer
+- `RABBITMQ_HOST` - Rabbitmq host (default: `localhost`)
+- `RABBITMQ_PORT` - Rabbitmq port (default: `5672`)
+- `RABBITMQ_USER` - Rabbitmq user (default: `guest`)
+- `RABBITMQ_PASSWORD` - Rabbitmq password (default: `guest`)
+- `RABBITMQ_VHOST` - Rabbitmq vhost (default: `/`)
+- `SMTP_AUTH` - SMTP auth (default: `false`)
+- `SMTP_HOST` - SMTP host (default: `localhost`)
+- `SMTP_PORT` - SMTP port (default: `25`)
+- `SMTP_USER` - SMTP user (default: `""`)
+- `SMTP_PASSWORD` - SMTP password (default: `""`)
+- `SMTP_FROM` - SMTP from (default: `""`)
+
 
 
 ## How to run
