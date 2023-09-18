@@ -172,3 +172,51 @@ func GetRabbitmqVhost() string {
 	}
 	return vhost
 }
+
+func GetSmtpAuth() bool {
+	auth := false
+	if os.Getenv("SMTP_AUTH") != "" {
+		auth, _ = strconv.ParseBool(os.Getenv("SMTP_AUTH"))
+	}
+	return auth
+}
+
+func GetSmtpHost() string {
+	host := "localhost"
+	if os.Getenv("SMTP_HOST") != "" {
+		host = os.Getenv("SMTP_HOST")
+	}
+	return host
+}
+
+func GetSmtpPort() string {
+	port := "25"
+	if os.Getenv("SMTP_PORT") != "" {
+		port = os.Getenv("SMTP_PORT")
+	}
+	return port
+}
+
+func GetSmtpUser() string {
+	user := ""
+	if os.Getenv("SMTP_USER") != "" {
+		user = os.Getenv("SMTP_USER")
+	}
+	return user
+}
+
+func GetSmtpPassword() string {
+	password := ""
+	if os.Getenv("SMTP_PASSWORD") != "" {
+		password = os.Getenv("SMTP_PASSWORD")
+	}
+	return password
+}
+
+func GetSmtpFrom() string {
+	from := "adventcalendar@localhost"
+	if os.Getenv("SMTP_FROM") != "" {
+		from = os.Getenv("SMTP_FROM")
+	}
+	return from
+}
