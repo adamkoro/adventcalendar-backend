@@ -41,7 +41,7 @@ func (r *Repository) GetAllEmails() ([]Email, error) {
 }
 
 func (r *Repository) DeleteEmailByName(name string) error {
-	return r.db.Delete(&Email{}, name).Error
+	return r.db.Where("name = ?", name).Delete(&Email{}).Error
 }
 
 func (r *Repository) GetEmailByName(name string) (*Email, error) {
