@@ -8,11 +8,11 @@ import (
 
 type Email struct {
 	Key        uint      `gorm:"primaryKey"`
-	Name       string    `gorm:"type:varchar(255);unique;not null"`
-	From       string    `gorm:"type:varchar(255);not null"`
-	To         string    `gorm:"type:varchar(5000);not null"`
-	Subject    string    `gorm:"type:varchar(255);not null"`
-	Body       string    `gorm:"type:varchar(5000);not null"`
+	Name       string    `gorm:"type:varchar(255);unique;not null" json:"name" binding:"required"`
+	From       string    `gorm:"type:varchar(255);not null" json:"from" binding:"required"`
+	To         string    `gorm:"type:varchar(5000);not null" json:"to" binding:"required"`
+	Subject    string    `gorm:"type:varchar(255);not null" json:"subject" binding:"required"`
+	Body       string    `gorm:"type:varchar(5000);not null" json:"body" binding:"required"`
 	CreatedAt  time.Time `gorm:"autoCreateTime"`
 	ModifiedAt time.Time `gorm:"autoUpdateTime"`
 }
