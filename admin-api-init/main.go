@@ -9,24 +9,26 @@ import (
 
 func main() {
 	// Postgres connection
-	db, err := postgres.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
+	var db *postgres.Repository
+	conn, err := db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
 	if err != nil {
 		log.Fatal(err)
 	}
+	db = postgres.NewRepository(conn)
 	log.Println("Postgres connection established.")
 	// Migrate
-	err = postgres.Migrate(db)
+	err = db.Migrate()
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Postgres migration completed.")
 	// Check if admin user exists
-	isAdminExists, err := postgres.GetUser(db, env.GetAdminUsername())
+	isAdminExists, err := db.GetUser(env.GetAdminUsername())
 	if err != nil {
 		log.Println("Admin user does not exist.")
 		log.Println("Admin user will be created.")
 		// Admin user create
-		err = postgres.CreateUser(db, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
+		err = db.CreateUser(env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -36,11 +38,11 @@ func main() {
 	log.Println("Admin user exists.")
 	// Update admin user if exists and password is not match
 	if isAdminExists.Username != "" {
-		err = postgres.CheckUserPassword(db, env.GetAdminUsername(), env.GetAdminPassword())
+		err = db.CheckUserPassword(env.GetAdminUsername(), env.GetAdminPassword())
 		if err != nil {
 			log.Println("Admin password is not match.")
 			log.Println("Admin user password will be updated.")
-			err = postgres.UpdateUser(db, env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
+			err = db.UpdateUser(env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -48,5 +50,5 @@ func main() {
 		}
 	}
 	// Close connection
-	defer postgres.Close(db)
+	defer db.Close()
 }

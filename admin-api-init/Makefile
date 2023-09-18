@@ -1,7 +1,7 @@
 tidy:
 	go mod tidy
 run:
-	go run main.go
+	DB_HOST=localhost DB_PORT=5432 DB_USER=adventcalendar DB_PASSWORD=adventcalendar DB_NAME=adventcalendar go run main.go
 test:
 	go test -v ./...
 build:
