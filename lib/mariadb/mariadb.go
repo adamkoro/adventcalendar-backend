@@ -34,19 +34,19 @@ func (r *Repository) CreateEmail(email *Email) error {
 	return r.db.Create(email).Error
 }
 
-func (r *Repository) FindAll() ([]Email, error) {
+func (r *Repository) GetAllEmails() ([]Email, error) {
 	var emails []Email
 	err := r.db.Find(&emails).Error
 	return emails, err
 }
 
-func (r *Repository) DeleteEmail(key uint) error {
-	return r.db.Delete(&Email{}, key).Error
+func (r *Repository) DeleteEmailByName(name string) error {
+	return r.db.Delete(&Email{}, name).Error
 }
 
 func (r *Repository) GetEmailByName(name string) (Email, error) {
 	var email Email
-	err := r.db.First(&email, name).Error
+	err := r.db.First(&Email{}, name).Error
 	return email, err
 }
 
