@@ -8,7 +8,8 @@ import (
 
 type Email struct {
 	Key        uint      `gorm:"primaryKey"`
-	From       string    `gorm:"type:varchar(255);unique;not null"`
+	Name       string    `gorm:"type:varchar(255);unique;not null"`
+	From       string    `gorm:"type:varchar(255);not null"`
 	To         string    `gorm:"type:varchar(5000);not null"`
 	Subject    string    `gorm:"type:varchar(255);not null"`
 	Body       string    `gorm:"type:varchar(5000);not null"`
