@@ -1,10 +1,9 @@
 package mariadb
 
 import (
-	"database/sql"
 	"fmt"
-	"log"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -14,13 +13,9 @@ func NewRepository(db *gorm.DB) *Repository {
 	}
 }
 
-func (r *Repository) Connect(username, password, host, database string, port int) *sql.DB {
-	connString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, host, port, database)
-	db, err := sql.Open("mysql", connString)
-	if err != nil {
-		log.Println(err)
-	}
-	return db
+func (r *Repository) Connect(username, password, host, database string, port int) (*gorm.DB, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, host, port, database)
+	return gorm.Open(mysql.Open(dsn), &gorm.Config{})
 }
 
 func (r *Repository) Migrate() error {
