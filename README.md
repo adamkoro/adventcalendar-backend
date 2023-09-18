@@ -8,7 +8,8 @@
 ## Components
 - PostgreSQL
 - Redis
-- Rabbitmq
+- RabbitMQ
+- MariaDB
 
 ## Environment variables
 
