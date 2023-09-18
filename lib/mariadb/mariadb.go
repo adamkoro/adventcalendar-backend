@@ -44,9 +44,9 @@ func (r *Repository) DeleteEmailByName(name string) error {
 	return r.db.Delete(&Email{}, name).Error
 }
 
-func (r *Repository) GetEmailByName(name string) (Email, error) {
-	var email Email
-	err := r.db.First(&Email{}, name).Error
+func (r *Repository) GetEmailByName(name string) (*Email, error) {
+	email := &Email{}
+	err := r.db.Where("name = ?", name).First(email).Error
 	return email, err
 }
 
