@@ -10,6 +10,7 @@ import (
 
 var (
 	MqChannel *amqp.Channel
+	MqQUeue   amqp.Queue
 )
 
 func Ping(c *gin.Context) {
@@ -22,7 +23,7 @@ func SendMessageToRabbitMQ(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := SendMessage(MqChannel, message.EmailTo, message.Subject, message.Message)
+	err := SendMessage(MqChannel, MqQUeue.Name, message.EmailTo, message.Subject, message.Message)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -8,7 +8,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func SendMessage(channel *amqp.Channel, emailTo, subject, message string) error {
+func SendMessage(channel *amqp.Channel, queueName, emailTo, subject, message string) error {
 	messageJson, err := json.Marshal(model.MQMessage{
 		EmailTo: emailTo,
 		Subject: subject,
@@ -17,7 +17,7 @@ func SendMessage(channel *amqp.Channel, emailTo, subject, message string) error 
 	if err != nil {
 		return err
 	}
-	err = rabbitMQ.Publish(channel, "email", messageJson)
+	err = rabbitMQ.Publish(channel, queueName, messageJson)
 	if err != nil {
 		return err
 	}

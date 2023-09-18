@@ -32,23 +32,28 @@ func main() {
 	metricsPort = env.GetMetricsPort()
 	// RabbitMQ connection check
 	go func() {
-		var isConnected bool
+		//var isConnected bool
 		var channel *amqp.Channel
+		var queue amqp.Queue
 		rabbitConn, err := createRabbitMqConnection()
 		if err != nil {
 			log.Println(err)
 		}
-		isConnected = true
+		//isConnected = true
 		channel, err = rabbitMQ.CreateChannel(rabbitConn)
 		if err != nil {
 			log.Println(err)
 		}
-		err = rabbitMQ.CreateExchange(channel, "email")
+		log.Println("Connected to the rabbitmq.")
+		log.Println("Channel created.")
+		queue, err = rabbitMQ.DeclareQueue(channel, "email")
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println("Connected to the rabbitmq.")
-		for {
+		log.Println("Queue declared.")
+		endpoints.MqChannel = channel
+		endpoints.MqQUeue = queue
+		/*for {
 			pingConn, err := createRabbitMqConnection()
 			if err != nil {
 				log.Println("Lost connection to the rabbitmq, reconnecting...")
@@ -70,8 +75,9 @@ func main() {
 			}
 			rabbitMQ.CloseConnection(pingConn)
 			endpoints.MqChannel = channel
+			endpoints.MqQUeue = queue
 			time.Sleep(5 * time.Second)
-		}
+		}*/
 	}()
 
 	// Api server
