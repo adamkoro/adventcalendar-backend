@@ -30,7 +30,7 @@ func (r *Repository) Close() error {
 	return db.Close()
 }
 
-func (r *Repository) Create(email *Email) error {
+func (r *Repository) CreateEmail(email *Email) error {
 	return r.db.Create(email).Error
 }
 
@@ -44,9 +44,9 @@ func (r *Repository) DeleteEmail(key uint) error {
 	return r.db.Delete(&Email{}, key).Error
 }
 
-func (r *Repository) FindEmail(key uint) (Email, error) {
+func (r *Repository) GetEmailByName(name string) (Email, error) {
 	var email Email
-	err := r.db.First(&email, key).Error
+	err := r.db.First(&email, name).Error
 	return email, err
 }
 
