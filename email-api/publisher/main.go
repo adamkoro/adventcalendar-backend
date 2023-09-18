@@ -24,7 +24,7 @@ var (
 	httpPort    int
 	metricsPort int
 	rabbitConn  *amqp.Connection
-	db          md.Repository
+	db          *md.Repository
 )
 
 func main() {
@@ -83,10 +83,10 @@ func main() {
 	go func() {
 		var isConnected bool
 		mariadbConn, err := createMariaDbConnection()
-		db := md.NewRepository(mariadbConn)
 		if err != nil {
 			log.Println(err)
 		}
+		db := md.NewRepository(mariadbConn)
 		isConnected = true
 		log.Println("Connected to the mariadb.")
 		for {
@@ -186,5 +186,5 @@ func createRabbitMqConnection() (*amqp.Connection, error) {
 }
 
 func createMariaDbConnection() (*gorm.DB, error) {
-	return db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort())
+	return db.Connect(env.GetDbUser(), env.GetDbPassword(), env.GetDbHost(), env.GetDbName(), env.GetDbPort())
 }
