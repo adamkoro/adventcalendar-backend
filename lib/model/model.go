@@ -48,3 +48,7 @@ type MQMessage struct {
 	Subject string `json:"subject"`
 	Message string `json:"message"`
 }
+
+type EmailRequest struct {
+	Name string `json:"name" binding:"required"`
+}
