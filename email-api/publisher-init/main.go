@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"log"
+	"time"
 
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	md "github.com/adamkoro/adventcalendar-backend/lib/mariadb"
@@ -15,7 +17,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db = md.NewRepository(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	db = md.NewRepository(conn, &ctx)
 	log.Println("Connected to the MariaDB.")
 	// MariaDB migration
 	err = db.Migrate()

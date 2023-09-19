@@ -1,6 +1,7 @@
 package mariadb
 
 import (
+	"context"
 	"time"
 
 	"gorm.io/gorm"
@@ -18,5 +19,6 @@ type Email struct {
 }
 
 type Repository struct {
-	db *gorm.DB
+	Db  *gorm.DB
+	Ctx *context.Context
 }
