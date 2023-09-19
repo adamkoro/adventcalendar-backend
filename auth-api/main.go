@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	endpoints "github.com/adamkoro/adventcalendar-backend/admin-api/api"
+	endpoints "github.com/adamkoro/adventcalendar-backend/auth-api/api"
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/gin-gonic/gin"
@@ -22,7 +22,6 @@ var (
 	httpPort    int
 	metricsPort int
 	db          pg.Repository
-	//redisConn   *redis.Client
 )
 
 func main() {
@@ -59,33 +58,6 @@ func main() {
 		}
 	}()
 
-	// Redis connection check
-	/*go func() {
-		var isConnected bool
-		redisConn = createRedisConnection()
-		if redisConn != nil {
-			isConnected = true
-			log.Println("Connected to the redis.")
-		}
-		for {
-			err := rd.Ping(redisConn)
-			if err != nil {
-				log.Println("Lost connection to the redis, reconnecting...")
-				redisConn = createRedisConnection()
-				if err != nil {
-					isConnected = false
-					log.Println("Failed to reconnect to the redis.")
-				}
-			} else {
-				if !isConnected {
-					log.Println("Reconnected to the redis.")
-					isConnected = true
-				}
-			}
-			time.Sleep(5 * time.Second)
-		}
-	}()*/
-
 	// Api server
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -98,18 +70,12 @@ func main() {
 		// Public endpoints
 		// Health check
 		api.GET("/ping", endpoints.Ping)
-		// Admin endpoints (require authentication)
-		admin := api.Group("/admin")
-		admin.Use(endpoints.AuthRequired)
-		{
-			// Single user
-			admin.GET("/usermanage/user", endpoints.GetUser)
-			admin.POST("/usermanage/user", endpoints.CreateUser)
-			admin.PUT("/usermanage/user", endpoints.UpdateUser)
-			admin.DELETE("/usermanage/user", endpoints.DeleteUser)
-			// All users
-			admin.GET("/usermanage/users", endpoints.GetAllUsers)
-		}
+		// Login
+		api.POST("/auth/login", endpoints.Login)
+		// Basic auth
+		api.POST("/auth/api_login", endpoints.ApiLogin)
+		// Logout
+		api.POST("/auth/logout", endpoints.Logout)
 	}
 	api_server := &http.Server{
 		Addr:         ":" + strconv.Itoa(httpPort),
