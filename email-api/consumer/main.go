@@ -65,6 +65,7 @@ func sendMail(smtpAuth bool, smtpHost, smtpPort, smtpUser, smtpPassword, from, t
 	msg := []byte("From: " + from + "\r\n" +
 		"To: " + to + "\r\n" +
 		"Subject: " + subject + "\r\n" +
+		"MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n" +
 		"\r\n" +
 		body)
 	if smtpAuth {
