@@ -68,11 +68,14 @@ func main() {
 		admin.Use(endpoints.AuthRequired)
 		{
 			admin.GET("/public/dbs", endpoints.GetAllDatabase)
-			admin.GET("/public/day", endpoints.GetDay)
-			admin.GET("/public/days", endpoints.GetAllDay)
 			admin.POST("/public/day", endpoints.CreateDay)
 			admin.PUT("/public/day", endpoints.UpdateDay)
 			admin.DELETE("/public/day", endpoints.DeleteDay)
+		}
+		public := api.Group("/public")
+		{
+			public.GET("/day", endpoints.GetDay)
+			public.GET("/days", endpoints.GetAllDay)
 		}
 	}
 	api_server := &http.Server{
