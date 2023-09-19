@@ -1,5 +1,9 @@
 package model
 
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -44,11 +48,15 @@ type Session struct {
 }
 
 type MQMessage struct {
-	EmailTo string `json:"emailto"`
-	Subject string `json:"subject"`
-	Message string `json:"message"`
+	EmailTo string `json:"emailto" binding:"required"`
+	Subject string `json:"subject" binding:"required"`
+	Message string `json:"message" binding:"required"`
 }
 
 type EmailRequest struct {
 	Name string `json:"name" binding:"required"`
+}
+
+type DayIDRequest struct {
+	Id primitive.ObjectID `bson:"_id,omitempty" json:"id" binding:"required" validate:"required"`
 }
