@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	custModel "github.com/adamkoro/adventcalendar-backend/lib/model"
+	"github.com/adamkoro/adventcalendar-backend/lib/model"
 	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/gin-gonic/gin"
 )
@@ -12,12 +12,12 @@ import (
 var Db pg.Repository
 
 func CreateUser(c *gin.Context) {
-	var data custModel.CreateUserRequest
+	var data pg.CreateUserRequest
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: "invalid request body"}
+		errorresp := model.ErrorResponse{Error: "invalid request body"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -26,22 +26,22 @@ func CreateUser(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error while creating user"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: "error while creating user"}
+		errorresp := model.ErrorResponse{Error: "error while creating user"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	createuserresp := custModel.SuccessResponse{Status: "User created"}
+	createuserresp := model.SuccessResponse{Status: "User created"}
 	c.JSON(http.StatusOK, &createuserresp)
 }
 
 func GetUser(c *gin.Context) {
-	var data custModel.UserRequest
-	var getuserresp custModel.UserResponse
+	var data pg.UserRequest
+	var getuserresp pg.UserResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: "invalid request body"}
+		errorresp := model.ErrorResponse{Error: "invalid request body"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -50,7 +50,7 @@ func GetUser(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error while getting user"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: "error while getting user"}
+		errorresp := model.ErrorResponse{Error: "error while getting user"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
@@ -63,19 +63,19 @@ func GetUser(c *gin.Context) {
 }
 
 func GetAllUsers(c *gin.Context) {
-	var getallusersresp []custModel.UserResponse
+	var getallusersresp []pg.UserResponse
 
 	users, err := Db.GetAllUsers()
 	if err != nil {
 		errormessage := "Error while getting all users"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: "error while getting all users"}
+		errorresp := model.ErrorResponse{Error: "error while getting all users"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
 
 	for _, user := range users {
-		var userresp custModel.UserResponse
+		var userresp pg.UserResponse
 		userresp.Id = int(user.Key)
 		userresp.Username = user.Username
 		userresp.Email = user.Email
@@ -87,13 +87,13 @@ func GetAllUsers(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	var data custModel.UpdateUserRequest
-	var updateuserresp custModel.SuccessResponse
+	var data pg.UpdateUserRequest
+	var updateuserresp model.SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON to struct"
 		log.Println(errormessage + ":" + err.Error())
-		errorresp := custModel.ErrorResponse{Error: "invalid request body"}
+		errorresp := model.ErrorResponse{Error: "invalid request body"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -102,7 +102,7 @@ func UpdateUser(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error while updating user"
 		log.Println(errormessage + ":" + err.Error())
-		errorresp := custModel.ErrorResponse{Error: "error while updating user"}
+		errorresp := model.ErrorResponse{Error: "error while updating user"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
@@ -111,9 +111,9 @@ func UpdateUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-	var data custModel.UserRequest
-	var errorresp custModel.ErrorResponse
-	var deleteuserresp custModel.SuccessResponse
+	var data pg.UserRequest
+	var errorresp model.ErrorResponse
+	var deleteuserresp model.SuccessResponse
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON to struct"

@@ -18,6 +18,16 @@ type Email struct {
 	ModifiedAt time.Time `gorm:"autoUpdateTime"`
 }
 
+type MQMessage struct {
+	EmailTo string `json:"emailto" binding:"required"`
+	Subject string `json:"subject" binding:"required"`
+	Message string `json:"message" binding:"required"`
+}
+
+type EmailRequest struct {
+	Name string `json:"name" binding:"required"`
+}
+
 type Repository struct {
 	Db  *gorm.DB
 	Ctx *context.Context

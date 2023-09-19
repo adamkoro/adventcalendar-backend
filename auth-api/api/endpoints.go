@@ -6,7 +6,7 @@ import (
 
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	custJWT "github.com/adamkoro/adventcalendar-backend/lib/jwt"
-	custModel "github.com/adamkoro/adventcalendar-backend/lib/model"
+	"github.com/adamkoro/adventcalendar-backend/lib/model"
 	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/gin-gonic/gin"
 )
@@ -14,13 +14,13 @@ import (
 var Db pg.Repository
 
 func Login(c *gin.Context) {
-	var data custModel.LoginRequest
+	var data pg.LoginRequest
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		log.Println(c.Request.Body.Read([]byte{}))
 		errormessage := "Error binding JSON: " + err.Error()
 		log.Println(errormessage)
-		errorresp := custModel.ErrorResponse{Error: "invalid request body"}
+		errorresp := model.ErrorResponse{Error: "invalid request body"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -29,7 +29,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		errormessage := "Username or password incorrect"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := model.ErrorResponse{Error: errormessage}
 		c.JSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -37,11 +37,11 @@ func Login(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error generating JWT token"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: "generating token"}
+		errorresp := model.ErrorResponse{Error: "generating token"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-	loginresp := custModel.SuccessResponse{Status: "Login successful"}
+	loginresp := model.SuccessResponse{Status: "Login successful"}
 	log.Println(loginresp.Status)
 	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, &loginresp)
@@ -52,7 +52,7 @@ func Logout(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error getting cookie"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: "cookie not found, please login again"}
+		errorresp := model.ErrorResponse{Error: "cookie not found, please login again"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -60,11 +60,11 @@ func Logout(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error validating JWT token"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: "invalid token, please login again"}
+		errorresp := model.ErrorResponse{Error: "invalid token, please login again"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
-	logoutresp := custModel.SuccessResponse{Status: "Logout successful"}
+	logoutresp := model.SuccessResponse{Status: "Logout successful"}
 	log.Println(logoutresp.Status)
 	c.SetCookie("token", "", 0, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, &logoutresp)

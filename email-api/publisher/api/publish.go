@@ -3,13 +3,13 @@ package api
 import (
 	"encoding/json"
 
-	"github.com/adamkoro/adventcalendar-backend/lib/model"
+	db "github.com/adamkoro/adventcalendar-backend/lib/mariadb"
 	rabbitMQ "github.com/adamkoro/adventcalendar-backend/lib/rabbitmq"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func SendMessage(channel *amqp.Channel, queueName, emailTo, subject, message string) error {
-	messageJson, err := json.Marshal(model.MQMessage{
+	messageJson, err := json.Marshal(db.MQMessage{
 		EmailTo: emailTo,
 		Subject: subject,
 		Message: message,

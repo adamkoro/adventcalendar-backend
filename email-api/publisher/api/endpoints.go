@@ -20,7 +20,7 @@ func Ping(c *gin.Context) {
 }
 
 func EmailSend(c *gin.Context) {
-	var rMail model.EmailRequest
+	var rMail db.EmailRequest
 	if err := c.ShouldBindJSON(&rMail); err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
 		return
@@ -39,7 +39,7 @@ func EmailSend(c *gin.Context) {
 }
 
 func CustomEmailSend(c *gin.Context) {
-	var message model.MQMessage
+	var message db.MQMessage
 	if err := c.ShouldBindJSON(&message); err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
 		return
@@ -53,7 +53,7 @@ func CustomEmailSend(c *gin.Context) {
 }
 
 func DeleteEmail(c *gin.Context) {
-	var rMail model.EmailRequest
+	var rMail db.EmailRequest
 	if err := c.ShouldBindJSON(&rMail); err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
 		return
