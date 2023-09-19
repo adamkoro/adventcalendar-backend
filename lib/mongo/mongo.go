@@ -17,7 +17,7 @@ func createConnString(username string, password string, address string, port int
 	return fmt.Sprintf("mongodb://%s:%s@%s:%d/", username, password, address, port)
 }
 
-func createClient(connectionString string, timeout *context.Context) (*mongo.Client, error) {
+func createClient(connectionString string, ctx *context.Context) (*mongo.Client, error) {
 	opts := options.Client()
 	opts.ApplyURI(connectionString)
 	opts.SetMaxPoolSize(100)
@@ -26,7 +26,7 @@ func createClient(connectionString string, timeout *context.Context) (*mongo.Cli
 	opts.SetTimeout(5 * time.Second)
 	opts.SetMaxConnIdleTime(5 * time.Second)
 	opts.SetSocketTimeout(5 * time.Second)
-	client, err := mongo.Connect(*timeout, opts)
+	client, err := mongo.Connect(*ctx, opts)
 	if err != nil {
 		return nil, err
 	}
