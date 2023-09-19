@@ -32,7 +32,8 @@ func main() {
 	go func() {
 		var isConnected bool
 		postgresConn, err := createPostgresConnection()
-		db := pg.NewRepository(postgresConn)
+		ctx := context.Background()
+		db := pg.NewRepository(postgresConn, &ctx)
 		if err != nil {
 			log.Println(err)
 		}
@@ -42,12 +43,7 @@ func main() {
 			err := db.Ping()
 			if err != nil {
 				log.Println("Lost connection to the postgres, reconnecting...")
-				postgresConn, err := createPostgresConnection()
-				db = pg.NewRepository(postgresConn)
-				if err != nil {
-					isConnected = false
-					log.Println("Failed to reconnect to the postgres.")
-				}
+				isConnected = false
 			} else {
 				if !isConnected {
 					log.Println("Reconnected to the postgres.")

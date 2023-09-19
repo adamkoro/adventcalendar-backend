@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
@@ -18,9 +19,10 @@ func CheckPasswordHash(password, hash string) error {
 	return err
 }
 
-func NewRepository(db *gorm.DB) *Repository {
+func NewRepository(db *gorm.DB, ctx *context.Context) *Repository {
 	return &Repository{
-		db: db,
+		Db:  db,
+		Ctx: ctx,
 	}
 }
 
@@ -30,11 +32,11 @@ func (r *Repository) Connect(dbHost string, dbUser string, dbPassword string, db
 }
 
 func (r *Repository) Migrate() error {
-	return r.db.AutoMigrate(&User{})
+	return r.Db.WithContext(*r.Ctx).AutoMigrate(&User{})
 }
 
 func (r *Repository) Close() error {
-	sqlDB, err := r.db.DB()
+	sqlDB, err := r.Db.WithContext(*r.Ctx).DB()
 	if err != nil {
 		return err
 	}
@@ -46,18 +48,18 @@ func (r *Repository) CreateUser(username string, email string, password string) 
 	if err != nil {
 		return err
 	}
-	return r.db.Create(&User{Username: username, Email: email, Password: hashpass}).Error
+	return r.Db.Create(&User{Username: username, Email: email, Password: hashpass}).Error
 }
 
 func (r *Repository) GetUser(username string) (*User, error) {
 	user := &User{}
-	err := r.db.Where("username = ?", username).First(user).Error
+	err := r.Db.WithContext(*r.Ctx).Where("username = ?", username).First(user).Error
 	return user, err
 }
 
 func (r *Repository) Login(username string, password string) error {
 	user := &User{}
-	err := r.db.Where("username = ?", username).First(user).Error
+	err := r.Db.WithContext(*r.Ctx).Where("username = ?", username).First(user).Error
 	if err != nil {
 		return err
 	}
@@ -69,7 +71,7 @@ func (r *Repository) Login(username string, password string) error {
 }
 
 func (r *Repository) DeleteUser(username string) error {
-	return r.db.Where("username = ?", username).Delete(&User{}).Error
+	return r.Db.WithContext(*r.Ctx).Where("username = ?", username).Delete(&User{}).Error
 }
 
 func (r *Repository) UpdateUser(username, email, password string) error {
@@ -79,22 +81,22 @@ func (r *Repository) UpdateUser(username, email, password string) error {
 	}
 
 	if email == "" {
-		return r.db.Model(&User{}).Where("username = ?", username).Updates(User{Password: hashpass}).Error
+		return r.Db.WithContext(*r.Ctx).Model(&User{}).Where("username = ?", username).Updates(User{Password: hashpass}).Error
 	}
 	if password == "" {
-		return r.db.Model(&User{}).Where("username = ?", username).Updates(User{Email: email}).Error
+		return r.Db.WithContext(*r.Ctx).Model(&User{}).Where("username = ?", username).Updates(User{Email: email}).Error
 	}
-	return r.db.Model(&User{}).Where("username = ?", username).Updates(User{Email: email, Password: hashpass}).Error
+	return r.Db.WithContext(*r.Ctx).Model(&User{}).Where("username = ?", username).Updates(User{Email: email, Password: hashpass}).Error
 }
 
 func (r *Repository) GetAllUsers() ([]User, error) {
 	var users []User
-	err := r.db.Find(&users).Error
+	err := r.Db.WithContext(*r.Ctx).Find(&users).Error
 	return users, err
 }
 
 func (r *Repository) Ping() error {
-	sqlDB, err := r.db.DB()
+	sqlDB, err := r.Db.WithContext(*r.Ctx).DB()
 	if err != nil {
 		return err
 	}
@@ -103,7 +105,7 @@ func (r *Repository) Ping() error {
 
 func (r *Repository) CheckUserPassword(username string, password string) error {
 	user := &User{}
-	err := r.db.Where("username = ?", username).First(user).Error
+	err := r.Db.WithContext(*r.Ctx).Where("username = ?", username).First(user).Error
 	if err != nil {
 		return err
 	}

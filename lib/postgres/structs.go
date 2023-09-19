@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"time"
 
 	"gorm.io/gorm"
@@ -16,5 +17,6 @@ type User struct {
 }
 
 type Repository struct {
-	db *gorm.DB
+	Db  *gorm.DB
+	Ctx *context.Context
 }

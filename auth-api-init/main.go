@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
@@ -14,7 +15,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db = postgres.NewRepository(conn)
+	ctx := context.Background()
+	db = postgres.NewRepository(conn, &ctx)
 	log.Println("Postgres connection established.")
 	// Migrate
 	err = db.Migrate()
