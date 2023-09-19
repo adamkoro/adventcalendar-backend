@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,6 +22,10 @@ func createClient(connectionString string, timeout *context.Context) (*mongo.Cli
 	opts.ApplyURI(connectionString)
 	opts.SetMaxPoolSize(100)
 	opts.SetMinPoolSize(10)
+	opts.SetConnectTimeout(5 * time.Second)
+	opts.SetTimeout(5 * time.Second)
+	opts.SetMaxConnIdleTime(5 * time.Second)
+	opts.SetSocketTimeout(5 * time.Second)
 	client, err := mongo.Connect(*timeout, opts)
 	if err != nil {
 		return nil, err
@@ -71,7 +76,7 @@ func NewRepository(client *mongo.Client, ctx *context.Context) *Repository {
 
 func (r *Repository) Connect(username string, password string, address string, port int) (*mongo.Client, *context.Context, error) {
 	connString := createConnString(username, password, address, port)
-	ctx := context.Background()
+	ctx := context.TODO()
 	client, err := createClient(connString, &ctx)
 	if err != nil {
 		return nil, nil, err
