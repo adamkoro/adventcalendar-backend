@@ -117,19 +117,19 @@ cd admin-api && make run
 Authentication is required for all endpoints below.
 Based on JWT(Json Web Token) authentication. Before using private endpoints, you need to get JWT token from `/api/login` endpoint.
 
-- `GET /api/admin/user` 
+- `GET /api/admin/usermanage/user` 
   - Get user
   - Payload (example): `{"username": "testuser1"}`
-- `POST /api/admin/user` 
+- `POST /api/admin/usermanage/user` 
   - Create user
   - Payload (example): `{"username": "testuser1", "email": "testuser1@test.local", "password": "testpassword1"}`
-- `PUT /api/admin/user` 
+- `PUT /api/admin/usermanage/user` 
   - Update user
   - Payload (example): `{"username": "testuser1", "email": "testuser1@gmail.com", "password": "testpassword1"}`
-- `DELETE /api/admin/user`
+- `DELETE /api/admin/usermanage/user`
   - Delete user
   - Payload (example): `{"username": "testuser1"}`
-- `GET /api/admin/users` 
+- `GET /api/admin/usermanage/users` 
   - Get all users
 
 ## Email Api endpoints
@@ -142,19 +142,19 @@ Based on JWT(Json Web Token) authentication. Before using private endpoints, you
 Authentication is required for all endpoints below.
 Based on JWT(Json Web Token) authentication. Before using private endpoints, you need to get JWT token from `/api/login` endpoint.
 
-- `GET /api/admin/email` 
+- `GET /api/admin/emailmanage/email` 
   - Get all email patterns
-- `POST /api/admin/customemail`
+- `POST /api/admin/emailmanage/customemail`
   - Create custom email, which is template for email and automatically send to RabbitMQ
   - Payload (example): `{"emailto": "yourname@gmail.com", "subject": "Test subject", "body": "Test body"}`
-- `POST /api/admin/sendemail`
+- `POST /api/admin/emailmanage/sendemail`
   - Send email to RabbitMQ, which is stored in database
   - Payload (example): `{"name": "customemailpattern"}`
-- `POST /api/admin/email`
+- `POST /api/admin/emailmanage/email`
   - Create email pattern, which is stored in database 
   - Payload (example): `{"name": "name": "customemailpattern", "from": "instace1@localhost", "to": "weblist@localhost", "subject": "Test subject", "body": "Test body"}`
-- `PUT /api/admin/email`
+- `PUT /api/admin/emailmanage/email`
   - Update email pattern
-- `DELETE /api/admin/email`
+- `DELETE /api/admin/emailmanage/email`
   - Delete email
   - Payload (example): `{"name": customname}` 
