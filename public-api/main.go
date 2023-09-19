@@ -32,10 +32,11 @@ func main() {
 		mongoDbConn, mongoDbContext, err := createMongoDbConnection()
 		if err != nil {
 			log.Println(err)
+		} else {
+			log.Println("Connected to the mongodb.")
 		}
 		db = mdb.NewRepository(mongoDbConn, mongoDbContext)
 		isConnected = true
-		log.Println("Connected to the mongodb.")
 		for {
 			err := db.PingDb()
 			if err != nil {

@@ -31,13 +31,15 @@ func main() {
 	go func() {
 		var isConnected bool
 		postgresConn, err := createPostgresConnection()
-		ctx := context.Background()
-		db := pg.NewRepository(postgresConn, &ctx)
 		if err != nil {
 			log.Println(err)
+		} else {
+			log.Println("Connected to the postgres.")
 		}
+		ctx := context.Background()
+		db := pg.NewRepository(postgresConn, &ctx)
+
 		isConnected = true
-		log.Println("Connected to the postgres.")
 		for {
 			err := db.Ping()
 			if err != nil {

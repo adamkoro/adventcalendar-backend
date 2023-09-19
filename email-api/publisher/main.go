@@ -85,11 +85,12 @@ func main() {
 		mariadbConn, err := createMariaDbConnection()
 		if err != nil {
 			log.Println(err)
+		} else {
+			log.Println("Connected to the mariadb.")
 		}
 		ctx := context.Background()
 		db := md.NewRepository(mariadbConn, &ctx)
 		isConnected = true
-		log.Println("Connected to the mariadb.")
 		for {
 			err := db.Ping()
 			if err != nil {
