@@ -125,12 +125,12 @@ func main() {
 		admin := api.Group("/admin")
 		admin.Use(endpoints.AuthRequired)
 		{
-			admin.GET("/email", endpoints.GetEmails)
-			admin.POST("/email", endpoints.CreateEmail)
-			admin.PUT("/email", nil)
-			admin.DELETE("/email", endpoints.DeleteEmail)
-			admin.POST("/sendemail", endpoints.EmailSend)
-			admin.POST("/customemail", endpoints.CustomEmailSend)
+			admin.GET("/emailmanage/email", endpoints.GetEmails)
+			admin.POST("/emailmanage/email", endpoints.CreateEmail)
+			admin.PUT("/emailmanage/email", nil)
+			admin.DELETE("/emailmanage/email", endpoints.DeleteEmail)
+			admin.POST("/emailmanage/sendemail", endpoints.EmailSend)
+			admin.POST("/emailmanage/customemail", endpoints.CustomEmailSend)
 		}
 	}
 	api_server := &http.Server{

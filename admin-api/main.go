@@ -107,12 +107,12 @@ func main() {
 		admin.Use(endpoints.AuthRequired)
 		{
 			// Single user
-			admin.GET("/user", endpoints.GetUser)
-			admin.POST("/user", endpoints.CreateUser)
-			admin.PUT("/user", endpoints.UpdateUser)
-			admin.DELETE("/user", endpoints.DeleteUser)
+			admin.GET("/usermanage/user", endpoints.GetUser)
+			admin.POST("/usermanage/user", endpoints.CreateUser)
+			admin.PUT("/usermanage/user", endpoints.UpdateUser)
+			admin.DELETE("/usermanage/user", endpoints.DeleteUser)
 			// All users
-			admin.GET("/users", endpoints.GetAllUsers)
+			admin.GET("/usermanage/users", endpoints.GetAllUsers)
 		}
 	}
 	api_server := &http.Server{
