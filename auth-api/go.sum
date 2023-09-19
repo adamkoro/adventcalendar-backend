@@ -1,6 +1,4 @@
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=
-github.com/adamkoro/adventcalendar-backend/admin-api v0.0.0-20230919061239-05b224235443 h1:f2v8Ufr4prKiXLqRRLkPfRbxVhmrWflrT9LzhY5rcRw=
-github.com/adamkoro/adventcalendar-backend/admin-api v0.0.0-20230919061239-05b224235443/go.mod h1:JcBzntD5EBnW60OgBkZp7sj2buNJoUGdxLnPNMRl3tA=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=

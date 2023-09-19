@@ -11,7 +11,6 @@ replace github.com/adamkoro/adventcalendar-backend/lib/jwt => ../lib/jwt
 replace github.com/adamkoro/adventcalendar-backend/lib/postgres => ../lib/postgres
 
 require (
-	github.com/adamkoro/adventcalendar-backend/admin-api v0.0.0-20230919061239-05b224235443
 	github.com/adamkoro/adventcalendar-backend/lib/env v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/jwt v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/model v0.0.0-00010101000000-000000000000
