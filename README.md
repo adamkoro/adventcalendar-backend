@@ -101,21 +101,29 @@ cd admin-api && make run
 ### Access to application
 - `http://localhost:8080` - Application
 - `http://localhost:8081` - Prometheus metrics
+
+## Auth Api endpoints
+**TODO**: Swagger documentation
+### Public endpoints
+- `GET /api/ping`
+  - Health check
+- `GET /metrics`
+  - Prometheus metrics
+- `POST /api/auth/login` 
+  - User login
+  - Payload (example): `{"username": "testuser1", "password": "testpassword1"}`
+- `POST /api/auth/logout` 
+  - User logout
 ## Admin Api endpoints
 **TODO**: Swagger documentation
 ### Public endpoints
 - `GET /api/ping`
   - Health check
-- `POST /api/login` 
-  - User login
-  - Payload (example): `{"username": "testuser1", "password": "testpassword1"}`
-- `POST /api/logout` 
-  - User logout
 - `GET /metrics`
   - Prometheus metrics
 ### Private endpoints - Authentication required
 Authentication is required for all endpoints below.
-Based on JWT(Json Web Token) authentication. Before using private endpoints, you need to get JWT token from `/api/login` endpoint.
+Based on JWT(Json Web Token) authentication. Before using private endpoints, you need to get JWT token from `/api/auth/login` endpoint.
 
 - `GET /api/admin/usermanage/user` 
   - Get user
@@ -137,10 +145,12 @@ Based on JWT(Json Web Token) authentication. Before using private endpoints, you
 ### Public endpoints
 - `GET /api/ping`
   - Health check
+- `GET /metrics`
+  - Prometheus metrics
 
 ### Private endpoints - Authentication required
 Authentication is required for all endpoints below.
-Based on JWT(Json Web Token) authentication. Before using private endpoints, you need to get JWT token from `/api/login` endpoint.
+Based on JWT(Json Web Token) authentication. Before using private endpoints, you need to get JWT token from `/api/auth/login` endpoint.
 
 - `GET /api/admin/emailmanage/email` 
   - Get all email patterns
