@@ -15,7 +15,7 @@ func AuthRequired(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error getting cookie: " + err.Error()
 		log.Println(errormessage)
-		errorresp := custModel.ErrorResponse{Error: "cookie not found"}
+		errorresp := custModel.ErrorResponse{Error: "cookie not found, please login again"}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}
@@ -23,7 +23,7 @@ func AuthRequired(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error validating JWT: " + err.Error()
 		log.Println(errormessage)
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "invalid token, please login again"}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
 		return
 	}

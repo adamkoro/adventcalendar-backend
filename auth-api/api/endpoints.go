@@ -20,7 +20,7 @@ func Login(c *gin.Context) {
 		log.Println(c.Request.Body.Read([]byte{}))
 		errormessage := "Error binding JSON: " + err.Error()
 		log.Println(errormessage)
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "invalid request body"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -37,7 +37,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error generating JWT token"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "generating token"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
@@ -52,7 +52,7 @@ func Logout(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error getting cookie"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "cookie not found, please login again"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -60,7 +60,7 @@ func Logout(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error validating JWT token"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "invalid token, please login again"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}

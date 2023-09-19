@@ -17,7 +17,7 @@ func CreateUser(c *gin.Context) {
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "invalid request body"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -26,12 +26,11 @@ func CreateUser(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error while creating user"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "error while creating user"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
 	createuserresp := custModel.SuccessResponse{Status: "User created"}
-	log.Println(createuserresp.Status)
 	c.JSON(http.StatusOK, &createuserresp)
 }
 
@@ -42,7 +41,7 @@ func GetUser(c *gin.Context) {
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "invalid request body"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -51,7 +50,7 @@ func GetUser(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error while getting user"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "error while getting user"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
@@ -70,7 +69,7 @@ func GetAllUsers(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error while getting all users"
 		log.Println(errormessage+" : ", err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "error while getting all users"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
@@ -94,7 +93,7 @@ func UpdateUser(c *gin.Context) {
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON to struct"
 		log.Println(errormessage + ":" + err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "invalid request body"}
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
@@ -103,12 +102,11 @@ func UpdateUser(c *gin.Context) {
 	if err != nil {
 		errormessage := "Error while updating user"
 		log.Println(errormessage + ":" + err.Error())
-		errorresp := custModel.ErrorResponse{Error: errormessage}
+		errorresp := custModel.ErrorResponse{Error: "error while updating user"}
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
 	updateuserresp.Status = "User updated"
-	log.Println(updateuserresp.Status)
 	c.JSON(http.StatusOK, &updateuserresp)
 }
 
@@ -121,14 +119,14 @@ func DeleteUser(c *gin.Context) {
 		errormessage := "Error binding JSON to struct"
 		log.Println(errormessage + ":" + err.Error())
 		errorresp.Error = errormessage
-		c.JSON(http.StatusBadRequest, &errorresp)
+		c.JSON(http.StatusBadRequest, "invalid request body")
 		return
 	}
 	if data.Username == "admin" {
 		errormessage := "Cannot delete admin user"
 		log.Println(errormessage)
 		errorresp.Error = errormessage
-		c.JSON(http.StatusBadRequest, &errorresp)
+		c.JSON(http.StatusBadRequest, "cannot delete admin user")
 		return
 	}
 	err := Db.DeleteUser(data.Username)
@@ -136,10 +134,9 @@ func DeleteUser(c *gin.Context) {
 		errormessage := "Error while deleting user"
 		log.Println(errormessage + ":" + err.Error())
 		errorresp.Error = errormessage
-		c.JSON(http.StatusInternalServerError, &errorresp)
+		c.JSON(http.StatusInternalServerError, "error while deleting user")
 		return
 	}
 	deleteuserresp.Status = "User deleted"
-	log.Println(deleteuserresp.Status)
 	c.JSON(http.StatusOK, &deleteuserresp)
 }
