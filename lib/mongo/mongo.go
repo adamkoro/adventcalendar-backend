@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -111,4 +112,67 @@ func (r *Repository) GetAllDatabase() ([]string, error) {
 		return nil, err
 	}
 	return dbs, nil
+}
+
+func (r *Repository) CreateDay(day *AdventCalendarDay, dbName, collectionName string) error {
+	collection := r.Db.Database(dbName).Collection(collectionName)
+	_, err := collection.InsertOne(*r.Ctx, day)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Repository) GetDay(day uint8, dbName, collectionName string) (*AdventCalendarDay, error) {
+	collection := r.Db.Database(dbName).Collection(collectionName)
+	var result AdventCalendarDay
+	err := collection.FindOne(*r.Ctx, bson.M{"day": day}).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *Repository) GetAllDay(dbName, collectionName string) ([]*AdventCalendarDay, error) {
+	collection := r.Db.Database(dbName).Collection(collectionName)
+	var results []*AdventCalendarDay
+	cur, err := collection.Find(*r.Ctx, bson.D{})
+	if err != nil {
+		return nil, err
+	}
+	for cur.Next(*r.Ctx) {
+		var elem AdventCalendarDay
+		err := cur.Decode(&elem)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, &elem)
+	}
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+	cur.Close(*r.Ctx)
+	if len(results) == 0 {
+		return nil, mongo.ErrNoDocuments
+	}
+	return results, nil
+}
+
+func (r *Repository) UpdateDay(day *AdventCalendarDay, dbName, collectionName string) error {
+	collection := r.Db.Database(dbName).Collection(collectionName)
+	update := bson.M{"day": day.Day, "year": day.Year, "title": day.Title, "content": day.Content}
+	_, err := collection.UpdateOne(*r.Ctx, bson.M{"_id": day.ID}, bson.M{"$set": update})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Repository) DeleteDay(id *primitive.ObjectID, dbName, collectionName string) error {
+	collection := r.Db.Database(dbName).Collection(collectionName)
+	_, err := collection.DeleteOne(*r.Ctx, bson.M{"_id": id})
+	if err != nil {
+		return err
+	}
+	return nil
 }
