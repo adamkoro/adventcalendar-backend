@@ -1,9 +1,5 @@
 package model
 
-import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -55,8 +51,4 @@ type MQMessage struct {
 
 type EmailRequest struct {
 	Name string `json:"name" binding:"required"`
-}
-
-type DayIDRequest struct {
-	Id primitive.ObjectID `bson:"_id,omitempty" json:"id" binding:"required" validate:"required"`
 }
