@@ -12,4 +12,5 @@ ENV GIN_MODE=release
 COPY --from=builder /go/src/builder/adventcalendar-email-consumer /home/user/app/
 WORKDIR /home/user/app
 EXPOSE 8080
+EXPOSE 8081
 CMD ["./adventcalendar-email-consumer"]
