@@ -72,7 +72,7 @@ func GetAllDay(c *gin.Context) {
 }
 
 func UpdateDay(c *gin.Context) {
-	var day mdb.AdventCalendarDay
+	var day mdb.AdventCalendarDayUpdate
 	if err := c.BindJSON(&day); err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "Invalid request payload."})
 		return
@@ -89,7 +89,7 @@ func UpdateDay(c *gin.Context) {
 }
 
 func DeleteDay(c *gin.Context) {
-	var dayID model.DayIDRequest
+	var dayID mdb.DayIDRequest
 	if err := c.BindJSON(&dayID); err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "Invalid request payload."})
 		return
@@ -98,7 +98,7 @@ func DeleteDay(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
 		return
 	}
-	if err := Db.DeleteDay(&dayID.Id, "adventcalendar", "days"); err != nil {
+	if err := Db.DeleteDay(&dayID, "adventcalendar", "days"); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "Internal server error."})
 		return
 	}

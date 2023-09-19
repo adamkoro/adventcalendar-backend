@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -158,7 +157,7 @@ func (r *Repository) GetAllDay(dbName, collectionName string) ([]*AdventCalendar
 	return results, nil
 }
 
-func (r *Repository) UpdateDay(day *AdventCalendarDay, dbName, collectionName string) error {
+func (r *Repository) UpdateDay(day *AdventCalendarDayUpdate, dbName, collectionName string) error {
 	collection := r.Db.Database(dbName).Collection(collectionName)
 	update := bson.M{"day": day.Day, "year": day.Year, "title": day.Title, "content": day.Content}
 	_, err := collection.UpdateOne(*r.Ctx, bson.M{"_id": day.ID}, bson.M{"$set": update})
@@ -168,9 +167,9 @@ func (r *Repository) UpdateDay(day *AdventCalendarDay, dbName, collectionName st
 	return nil
 }
 
-func (r *Repository) DeleteDay(id *primitive.ObjectID, dbName, collectionName string) error {
+func (r *Repository) DeleteDay(day *DayIDRequest, dbName, collectionName string) error {
 	collection := r.Db.Database(dbName).Collection(collectionName)
-	_, err := collection.DeleteOne(*r.Ctx, bson.M{"_id": id})
+	_, err := collection.DeleteOne(*r.Ctx, bson.M{"_id": day.Id})
 	if err != nil {
 		return err
 	}
