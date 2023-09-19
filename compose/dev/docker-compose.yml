@@ -56,6 +56,15 @@ services:
       MYSQL_DATABASE: adventcalendar
       MYSQL_USER: adventcalendar
       MYSQL_PASSWORD: adventcalendar
+  dev-mongodb:
+    image: docker.io/mongo:6.0
+    container_name: dev-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: adventcalendar
 networks:
   default:
     name: dev-adventcalendar
