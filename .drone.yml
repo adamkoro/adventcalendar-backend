@@ -25,3 +25,6 @@ steps:
     - latest
     platform: 
     - linux/amd64
+
+node:
+  type: hosted-amd64
