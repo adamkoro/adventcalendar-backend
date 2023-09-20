@@ -1,7 +1,7 @@
 FROM registry.suse.com/bci/golang:1.21 as builder
 WORKDIR /go/src/builder
-COPY admin-api-init/ .
-COPY lib ../lib
+COPY email-api/publisher-init/ .
+COPY lib ../../lib
 RUN go build -ldflags="-s -w" -o ./adventcalendar-email-publisher-init
 
 FROM registry.suse.com/bci/bci-micro:15.5

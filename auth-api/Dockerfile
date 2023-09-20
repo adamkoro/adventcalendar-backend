@@ -1,6 +1,6 @@
 FROM registry.suse.com/bci/golang:1.21 as builder
 WORKDIR /go/src/builder
-COPY admin-api/ .
+COPY auth-api/ .
 COPY lib ../lib
 RUN go build -ldflags="-s -w" -o ./adventcalendar-auth-api
 FROM registry.suse.com/bci/bci-micro:15.5
