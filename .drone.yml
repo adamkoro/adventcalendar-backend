@@ -47,8 +47,8 @@ steps:
     password:
       from_secret: registry_password
     registry: registry.adamkoro.com
-    repo: registry.adamkoro.com/adventcalendar/backend/auth-api-init
-    dockerfile: auth-api-init/Dockerfile
+    repo: registry.adamkoro.com/adventcalendar/backend/auth-api
+    dockerfile: auth-api/Dockerfile
     context: .
     tags:
     - latest
@@ -95,8 +95,8 @@ steps:
     password:
       from_secret: registry_password
     registry: registry.adamkoro.com
-    repo: registry.adamkoro.com/adventcalendar/backend/publisher
-    dockerfile: email-api/publisher/Dockerfile
+    repo: registry.adamkoro.com/adventcalendar/backend/consumer
+    dockerfile: email-api/consumer/Dockerfile
     context: .
     tags:
     - latest
