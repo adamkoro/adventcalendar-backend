@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
-	"github.com/adamkoro/adventcalendar-backend/lib/model"
 	rabbitMQ "github.com/adamkoro/adventcalendar-backend/lib/rabbitmq"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -54,7 +53,7 @@ func main() {
 	}
 	go func() {
 		for d := range consume {
-			var message model.MQMessage
+			var message rabbitMQ.MQMessage
 			err := json.Unmarshal(d.Body, &message)
 			if err != nil {
 				log.Println(err)
