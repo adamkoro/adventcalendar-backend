@@ -15,8 +15,8 @@ steps:
     REGISTRY_PASS:
       from_secret: registry_password
   settings:
-    username: ${REGISTRY_USER}
-    password: ${REGISTRY_PASS}
+    username: $REGISTRY_USER
+    password: $REGISTRY_PASS
     registry: registry.adamkoro.com
     repo: registry.adamkoro.com/adventcalendar/backend/admin-api
     dockerfile: admin-api/Dockerfile
