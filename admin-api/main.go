@@ -13,6 +13,7 @@ import (
 	endpoints "github.com/adamkoro/adventcalendar-backend/admin-api/api"
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
+	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gorm.io/gorm"
@@ -26,6 +27,7 @@ var (
 )
 
 func main() {
+	figure.NewFigure("AdventCalendar Admin Api", "big", false).Print()
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
 	// Postgres connection check

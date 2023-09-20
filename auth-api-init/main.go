@@ -6,9 +6,11 @@ import (
 
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	"github.com/adamkoro/adventcalendar-backend/lib/postgres"
+	"github.com/common-nighthawk/go-figure"
 )
 
 func main() {
+	figure.NewFigure("AdventCalendar Auth Api Init", "big", false).Print()
 	// Postgres connection
 	var db *postgres.Repository
 	conn, err := db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())

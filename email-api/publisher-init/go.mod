@@ -9,6 +9,7 @@ replace github.com/adamkoro/adventcalendar-backend/lib/env => ../../lib/env
 require (
 	github.com/adamkoro/adventcalendar-backend/lib/env v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/mariadb v0.0.0-00010101000000-000000000000
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 )
 
 require (

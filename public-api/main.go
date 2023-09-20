@@ -13,6 +13,7 @@ import (
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	mdb "github.com/adamkoro/adventcalendar-backend/lib/mongo"
 	endpoints "github.com/adamkoro/adventcalendar-backend/public-api/api"
+	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,6 +26,7 @@ var (
 )
 
 func main() {
+	figure.NewFigure("AdventCalendar Public Api", "big", false).Print()
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
 	go func() {

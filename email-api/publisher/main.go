@@ -14,6 +14,7 @@ import (
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	md "github.com/adamkoro/adventcalendar-backend/lib/mariadb"
 	rabbitMQ "github.com/adamkoro/adventcalendar-backend/lib/rabbitmq"
+	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -28,6 +29,7 @@ var (
 )
 
 func main() {
+	figure.NewFigure("AdventCalendar Email Publisher", "big", false).Print()
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
 	// RabbitMQ connection check

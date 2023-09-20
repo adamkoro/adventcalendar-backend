@@ -7,9 +7,11 @@ import (
 
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	md "github.com/adamkoro/adventcalendar-backend/lib/mariadb"
+	"github.com/common-nighthawk/go-figure"
 )
 
 func main() {
+	figure.NewFigure("AdventCalendar Email Publisher", "big", false).Print()
 	// MariaDB connection
 	log.Println("Connecting to the MariaDB...")
 	var db *md.Repository
