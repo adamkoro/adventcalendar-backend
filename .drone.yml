@@ -1,5 +1,5 @@
 kind: pipeline
-name: build-backend
+name: build-amd64
 type: docker
 
 platform:
