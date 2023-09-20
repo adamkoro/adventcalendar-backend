@@ -7,7 +7,7 @@ platform:
   arch: amd64
 
 steps:
-- name: docker
+- name: admin-api
   image: plugins/docker
   settings:
     username:
@@ -17,6 +17,102 @@ steps:
     registry: registry.adamkoro.com
     repo: registry.adamkoro.com/adventcalendar/backend/admin-api
     dockerfile: admin-api/Dockerfile
+    context: .
+    tags:
+    - latest
+    platform: 
+    - linux/amd64
+
+- name: auth-api-init
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: registry_user
+    password:
+      from_secret: registry_password
+    registry: registry.adamkoro.com
+    repo: registry.adamkoro.com/adventcalendar/backend/auth-api-init
+    dockerfile: auth-api-init/Dockerfile
+    context: .
+    tags:
+    - latest
+    platform: 
+    - linux/amd64
+
+- name: auth-api
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: registry_user
+    password:
+      from_secret: registry_password
+    registry: registry.adamkoro.com
+    repo: registry.adamkoro.com/adventcalendar/backend/auth-api-init
+    dockerfile: auth-api-init/Dockerfile
+    context: .
+    tags:
+    - latest
+    platform: 
+    - linux/amd64
+
+- name: publisher-api-init
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: registry_user
+    password:
+      from_secret: registry_password
+    registry: registry.adamkoro.com
+    repo: registry.adamkoro.com/adventcalendar/backend/publisher-init
+    dockerfile: email-api/publisher-init/Dockerfile
+    context: .
+    tags:
+    - latest
+    platform: 
+    - linux/amd64
+
+- name: publisher-api
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: registry_user
+    password:
+      from_secret: registry_password
+    registry: registry.adamkoro.com
+    repo: registry.adamkoro.com/adventcalendar/backend/publisher
+    dockerfile: email-api/publisher/Dockerfile
+    context: .
+    tags:
+    - latest
+    platform: 
+    - linux/amd64
+
+- name: consumer
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: registry_user
+    password:
+      from_secret: registry_password
+    registry: registry.adamkoro.com
+    repo: registry.adamkoro.com/adventcalendar/backend/publisher
+    dockerfile: email-api/publisher/Dockerfile
+    context: .
+    tags:
+    - latest
+    platform: 
+    - linux/amd64
+
+- name: public-api
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: registry_user
+    password:
+      from_secret: registry_password
+    registry: registry.adamkoro.com
+    repo: registry.adamkoro.com/adventcalendar/backend/public-api
+    dockerfile: public-api/Dockerfile
     context: .
     tags:
     - latest
