@@ -93,13 +93,12 @@ steps:
         from_secret: registry_user
       REGISTRY_PASSWORD:
         from_secret: registry_password
-      COMPONENT_NAME: {{ .input.componentName }}
     commands:
       - docker context create build --docker "host=ssh://root@$(cat /build_env/linode_ip_address | cut -d'=' -f2)"
       - docker context use build
       - docker buildx create --use --name builder
       - docker login registry.adamkoro.com -u $REGISTRY_USER -p $REGISTRY_PASSWORD
-      - docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t registry.adamkoro.com/adventcalendar/backend/${COMPONENT_NAME}:latest -t registry.adamkoro.com/adventcalendar/backend/${COMPONENT_NAME}:${DRONE_COMMIT_SHA:0:7} . -f {{ .input.dockerfile }}
+      - docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t registry.adamkoro.com/adventcalendar/backend/{{ .input.componentName }}:latest -t registry.adamkoro.com/adventcalendar/backend/{{ .input.componentName }}:${DRONE_COMMIT_SHA:0:7} . -f {{ .input.dockerfile }}
     volumes:
       - name: build_env
         path: /build_env
