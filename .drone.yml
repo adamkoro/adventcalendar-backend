@@ -12,13 +12,13 @@ data:
         componentName: admin-auth
         dockerfile: admin-auth/Dockerfile
     - input:
-        componentName: email/publisher-init
+        componentName: email-publisher-init
         dockerfile: email-api/publisher-init/Dockerfile
     - input:
-        componentName: email/publisher
+        componentName: email-publisher
         dockerfile: email-api/publisher/Dockerfile
     - input:
-        componentName: email/consumer
+        componentName: email-consumer
         dockerfile: email-api/consumer/Dockerfile
     - input:
         componentName: public-api
