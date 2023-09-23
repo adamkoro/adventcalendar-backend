@@ -1,5 +1,11 @@
 kind: pipeline
 type: docker
+name:  {{ .input.componentName }}
+platform:
+  os: linux
+  arch: amd64
+node:
+  type: hosted-amd64
 steps:
   - name: generate password
     image: registry.suse.com/bci/bci-base:15.5
@@ -25,7 +31,8 @@ steps:
         from_secret: linode_token
       TF_VAR_linode_authorized_keys:
         from_secret: linode_authorized_keys
-      TF_VAR_linode_label: "{{ input.componentName }}-build-${DRONE_COMMIT_SHA:0:7}"
+      COMPONENT_NAME: {{ .input.componentName }}
+      TF_VAR_linode_label: "${COMPONENT_NAME}-build-${DRONE_COMMIT_SHA:0:7}"
       TF_VAR_linode_type: g6-standard-8
       TF_VAR_linode_region: it-mil
     commands:
@@ -87,7 +94,7 @@ steps:
         from_secret: registry_user
       REGISTRY_PASSWORD:
         from_secret: registry_password
-      COMPONENT_NAME: "{{ input.componentName }}"
+      COMPONENT_NAME: {{ .input.componentName }}
     commands:
       - docker context create build --docker "host=ssh://root@$(cat /build_env/linode_ip_address | cut -d'=' -f2)"
       - docker context use build
