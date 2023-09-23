@@ -1,5 +1,10 @@
 kind: template
-load: drone-templates/image-build.yml
+load: image-build.yml
 name: admin-api
 data: 
   componentName: admin-api
+platform:
+  os: linux
+  arch: amd64
+node:
+  type: hosted-amd64
