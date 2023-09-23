@@ -1,5 +1,5 @@
 kind: template
-load: image-build.yml
+load: image-build.yaml
 name: admin-api
 data: 
   componentName: admin-api
