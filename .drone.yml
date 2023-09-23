@@ -1,2 +1,10 @@
-include:
-  - local: drone-templates/admin-api.yaml
+kind: template
+load: image-build.yaml
+data:
+  components:
+    - input:
+        componentName: admin-api
+        dockerfile: admin-api/Dockerfile
+    - input:
+        componentName: admin-auth-init
+        dockerfile: admin-auth-init/Dockerfile
