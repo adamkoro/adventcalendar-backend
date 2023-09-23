@@ -1,5 +1,0 @@
-kind: template
-load: image-build.yaml
-data: 
-  componentName: admin-api
-  dockerfile: admin-api/Dockerfile

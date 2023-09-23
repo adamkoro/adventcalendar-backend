@@ -1,5 +1,0 @@
-kind: template
-load: image-build.yaml
-data: 
-  componentName: auth-api-init
-  dockerfile: auth-api-init/Dockerfile
