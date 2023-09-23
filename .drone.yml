@@ -1,10 +1,4 @@
 kind: template
 load: image-build.yaml
-name: admin-api
 data: 
   componentName: admin-api
-platform:
-  os: linux
-  arch: amd64
-node:
-  type: hosted-amd64
