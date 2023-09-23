@@ -1,3 +1,5 @@
+{{- range .input.components -}}
+---
 kind: pipeline
 type: docker
 name:  {{ .input.componentName }}
@@ -130,3 +132,4 @@ volumes:
     temp: {}
   - name: ssh_config
     temp: {}
+{{ end }}
