@@ -1,0 +1,135 @@
+kind: pipeline
+type: docker
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: generate password
+    image: registry.suse.com/bci/bci-base:15.5
+    commands:
+      - echo "TF_VAR_linode_root_pass=$(openssl rand -base64 32 | tr -d '\n' | base64 -w 0)" > /build_env/linode_root_pass
+    volumes:
+      - name: build_env
+        path: /build_env
+
+  - name: clone setup repo
+    image: registry.suse.com/bci/bci-base:15.5
+    commands:
+      - zypper ref && zypper -n in git
+      - git clone https://github.com/adamkoro/linode_terraform.git /build_env/setup
+    volumes:
+      - name: build_env
+        path: /build_env
+
+  - name: create linode
+    image: registry.adamkoro.com/docker/hashicorp/terraform:1.5.5
+    environment:
+      TF_VAR_linode_token:
+        from_secret: linode_token
+      TF_VAR_linode_authorized_keys:
+        from_secret: linode_authorized_keys
+      TF_VAR_linode_label: "{{ input.componentName }}-build-${DRONE_COMMIT_SHA:0:7}"
+      TF_VAR_linode_type: g6-standard-8
+      TF_VAR_linode_region: it-mil
+    commands:
+      - export $(cat /build_env/linode_root_pass | xargs)
+      - cd /build_env/setup
+      - terraform -chdir=terraform/ init 
+      - terraform -chdir=terraform/ plan
+      - terraform -chdir=terraform/ apply -auto-approve
+    volumes:
+      - name: build_env
+        path: /build_env
+    when:
+      status:
+        - success
+
+  - name: wait for linode
+    image: registry.adamkoro.com/library/ansible:latest
+    environment:
+      SSH_PRIVATE_KEY:
+        from_secret: linode_ssh_private_key
+    commands:
+      - while ! nc -q0 $(cat /build_env/linode_ip_address | cut -d'=' -f2) 22 < /dev/null > /dev/null 2>&1; do sleep 1;done
+      - eval $(ssh-agent -s)
+      - ssh-keyscan -H $(cat /build_env/linode_ip_address | cut -d'=' -f2) >> /root/.ssh/known_hosts
+      - echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
+      - chmod 600 /root/.ssh/id_rsa
+      - ssh root@$(cat /build_env/linode_ip_address | cut -d'=' -f2) "echo 'ssh connection successful'"
+
+    volumes:
+      - name: build_env
+        path: /build_env
+      - name: ssh_config
+        path: /root/.ssh/
+    when:
+      status:
+        - success
+
+  - name: setup linode
+    image: registry.adamkoro.com/library/ansible:latest
+    environment:
+      ANSIBLE_USER: root
+    commands:
+      - cd /build_env/setup
+      - ansible-galaxy collection install community.docker
+      - ansible-playbook ansible/docker_setup.yml -i $(cat /build_env/linode_ip_address | cut -d'=' -f2),
+    volumes:
+      - name: build_env
+        path: /build_env
+      - name: ssh_config
+        path: /root/.ssh/
+    when:
+      status:
+        - success
+
+  - name: build multiarch image
+    image:  registry.adamkoro.com/docker/library/docker:24.0.6-cli-alpine3.18
+    environment:
+      REGISTRY_USER:
+        from_secret: registry_user
+      REGISTRY_PASSWORD:
+        from_secret: registry_password
+    commands:
+      - docker context create build --docker "host=ssh://root@$(cat /build_env/linode_ip_address | cut -d'=' -f2)"
+      - docker context use build
+      - docker buildx create --use --name builder
+      - docker login registry.adamkoro.com -u $REGISTRY_USER -p $REGISTRY_PASSWORD
+      - docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t registry.adamkoro.com/adventcalendar/backend/{{ .input.componentName }}:latest -t rregistry.adamkoro.com/adventcalendar/backend/{{ .input.componentName }}:${DRONE_COMMIT_SHA:0:7} . -f Dockerfile
+    volumes:
+      - name: build_env
+        path: /build_env
+      - name: ssh_config
+        path: /root/.ssh/
+
+  - name: delete linode
+    image: registry.adamkoro.com/docker/hashicorp/terraform:1.5.5
+    environment:
+      TF_VAR_linode_token:
+        from_secret: linode_token
+      TF_VAR_linode_authorized_keys:
+        from_secret: linode_authorized_keys
+    commands:
+      - export $(cat /build_env/linode_root_pass | xargs)
+      - cd /build_env/setup
+      - terraform -chdir=terraform/ init 
+      - terraform -chdir=terraform/ destroy -auto-approve
+    volumes:
+      - name: build_env
+        path: /build_env
+    when:
+      status:
+        - failure
+        - success
+
+
+volumes:
+  - name: build_env
+    temp: {}
+  - name: ssh_config
+    temp: {}
+
+node:
+  type: hosted-amd64
