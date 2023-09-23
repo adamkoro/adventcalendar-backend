@@ -9,27 +9,27 @@ import (
 
 type User struct {
 	Key        uint      `gorm:"primaryKey"`
-	Username   string    `gorm:"type:varchar(32);unique;not null"`
-	Email      string    `gorm:"type:varchar(255);unique;not null"`
-	Password   string    `gorm:"type:varchar(255);not null"`
+	Username   string    `gorm:"type:varchar(32);unique;not null" validate:"required,min=1,max=32"`
+	Email      string    `gorm:"type:varchar(255);unique;not null" validate:"required,min=1,max=255"`
+	Password   string    `gorm:"type:varchar(255);not null" validate:"required,min=1,max=255"`
 	CreatedAt  time.Time `gorm:"autoCreateTime"`
 	ModifiedAt time.Time `gorm:"autoUpdateTime"`
 }
 
 type CreateUserRequest struct {
-	Username string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required" validate:"required,min=1,max=32"`
+	Email    string `json:"email" binding:"required" validate:"required,min=1,max=255"`
+	Password string `json:"password" binding:"required" validate:"required,min=1,max=255"`
 }
 
 type UpdateUserRequest struct {
-	Username string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required"`
+	Username string `json:"username" binding:"required" validate:"required,min=1,max=32"`
+	Email    string `json:"email" binding:"required" validate:"required,min=1,max=255"`
 	Password string `json:"password"`
 }
 
 type UserRequest struct {
-	Username string `json:"username" binding:"required"`
+	Username string `json:"username" binding:"required" validate:"required,min=1,max=32"`
 }
 type UserResponse struct {
 	Id       int    `json:"id"`
@@ -40,8 +40,8 @@ type UserResponse struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required" validate:"required,min=1,max=32"`
+	Password string `json:"password" binding:"required" validate:"required,min=1,max=255"`
 }
 
 type Repository struct {

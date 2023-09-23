@@ -63,6 +63,8 @@ func main() {
 	if gin.Mode() == gin.DebugMode {
 		router.Use(endpoints.CORSMiddleware())
 	}
+	// Swagger
+	router.StaticFile("/swagger/doc.json", "./docs/swagger.json")
 	api := router.Group("/api")
 	{
 		// Public endpoints

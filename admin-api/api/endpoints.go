@@ -7,9 +7,13 @@ import (
 	"github.com/adamkoro/adventcalendar-backend/lib/model"
 	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
-var Db pg.Repository
+var (
+	Db       pg.Repository
+	validate = validator.New()
+)
 
 func CreateUser(c *gin.Context) {
 	var data pg.CreateUserRequest
@@ -21,7 +25,10 @@ func CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
-
+	if validationErr := validate.Struct(&data); validationErr != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
+		return
+	}
 	err := Db.CreateUser(data.Username, data.Email, data.Password)
 	if err != nil {
 		errormessage := "Error while creating user"
@@ -37,7 +44,6 @@ func CreateUser(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	var data pg.UserRequest
 	var getuserresp pg.UserResponse
-
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON"
 		log.Println(errormessage+" : ", err.Error())
@@ -45,7 +51,10 @@ func GetUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
-
+	if validationErr := validate.Struct(&data); validationErr != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
+		return
+	}
 	user, err := Db.GetUser(data.Username)
 	if err != nil {
 		errormessage := "Error while getting user"
@@ -54,7 +63,6 @@ func GetUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-
 	getuserresp.Id = int(user.Key)
 	getuserresp.Email = user.Email
 	getuserresp.Created = user.CreatedAt.String()
@@ -73,7 +81,6 @@ func GetAllUsers(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, &errorresp)
 		return
 	}
-
 	for _, user := range users {
 		var userresp pg.UserResponse
 		userresp.Id = int(user.Key)
@@ -89,7 +96,6 @@ func GetAllUsers(c *gin.Context) {
 func UpdateUser(c *gin.Context) {
 	var data pg.UpdateUserRequest
 	var updateuserresp model.SuccessResponse
-
 	if err := c.ShouldBindJSON(&data); err != nil {
 		errormessage := "Error binding JSON to struct"
 		log.Println(errormessage + ":" + err.Error())
@@ -97,7 +103,10 @@ func UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, &errorresp)
 		return
 	}
-
+	if validationErr := validate.Struct(&data); validationErr != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
+		return
+	}
 	err := Db.UpdateUser(data.Username, data.Email, data.Password)
 	if err != nil {
 		errormessage := "Error while updating user"
@@ -120,6 +129,10 @@ func DeleteUser(c *gin.Context) {
 		log.Println(errormessage + ":" + err.Error())
 		errorresp.Error = errormessage
 		c.JSON(http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if validationErr := validate.Struct(&data); validationErr != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
 		return
 	}
 	if data.Username == "admin" {

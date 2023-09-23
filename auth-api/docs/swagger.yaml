@@ -1,0 +1,80 @@
+definitions:
+  model.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  model.SuccessResponse:
+    properties:
+      status:
+        type: string
+    type: object
+  postgres.LoginRequest:
+    properties:
+      password:
+        maxLength: 255
+        minLength: 1
+        type: string
+      username:
+        maxLength: 32
+        minLength: 1
+        type: string
+    required:
+    - password
+    - username
+    type: object
+info:
+  contact: {}
+paths:
+  /api/admin/login:
+    post:
+      consumes:
+      - application/json
+      description: Login admin user via username and password and get JWT token
+      parameters:
+      - description: Login
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/postgres.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: login successful
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "400":
+          description: Invalid json request or validation error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Username or password incorrect
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Error generating JWT token or database connection error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Admin user login
+      tags:
+      - auth
+  /api/admin/logout:
+    post:
+      description: Logout admin user via cookie and get empty cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: logout successful
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "400":
+          description: Cookie not found or JWT validation error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Admin user logout
+      tags:
+      - auth
+swagger: "2.0"
