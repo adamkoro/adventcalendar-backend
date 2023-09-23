@@ -8,3 +8,18 @@ data:
     - input:
         componentName: admin-auth-init
         dockerfile: admin-auth-init/Dockerfile
+    - input:
+        componentName: admin-auth
+        dockerfile: admin-auth/Dockerfile
+    - input:
+        componentName: publisher-init
+        dockerfile: email-api/publisher-init/Dockerfile
+    - input:
+        componentName: publisher
+        dockerfile: email-api/publisher/Dockerfile
+    - input:
+        componentName: consumer
+        dockerfile: email-api/consumer/Dockerfile
+    - input:
+        componentName: public-api
+        dockerfile: public-api/Dockerfile
