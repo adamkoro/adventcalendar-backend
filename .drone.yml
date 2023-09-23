@@ -6,11 +6,11 @@ data:
         componentName: admin-api
         dockerfile: admin-api/Dockerfile
     - input:
-        componentName: admin-auth-init
-        dockerfile: admin-auth-init/Dockerfile
+        componentName: auth-api-init
+        dockerfile: auth-api-init/Dockerfile
     - input:
-        componentName: admin-auth
-        dockerfile: admin-auth/Dockerfile
+        componentName: auth-api
+        dockerfile: auth-api/Dockerfile
     - input:
         componentName: email-publisher-init
         dockerfile: email-api/publisher-init/Dockerfile
