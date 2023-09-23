@@ -31,8 +31,7 @@ steps:
         from_secret: linode_token
       TF_VAR_linode_authorized_keys:
         from_secret: linode_authorized_keys
-      COMPONENT_NAME: {{ .input.componentName }}
-      TF_VAR_linode_label: "${COMPONENT_NAME}-build-${DRONE_COMMIT_SHA:0:7}"
+      TF_VAR_linode_label: "{{ .input.componentName }}-build-${DRONE_COMMIT_SHA:0:7}"
       TF_VAR_linode_type: g6-standard-8
       TF_VAR_linode_region: it-mil
     commands:
@@ -100,7 +99,7 @@ steps:
       - docker context use build
       - docker buildx create --use --name builder
       - docker login registry.adamkoro.com -u $REGISTRY_USER -p $REGISTRY_PASSWORD
-      - docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t registry.adamkoro.com/adventcalendar/backend/${COMPONENT_NAME}:latest -t rregistry.adamkoro.com/adventcalendar/backend/${COMPONENT_NAME}:${DRONE_COMMIT_SHA:0:7} . -f Dockerfile
+      - docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t registry.adamkoro.com/adventcalendar/backend/${COMPONENT_NAME}:latest -t registry.adamkoro.com/adventcalendar/backend/${COMPONENT_NAME}:${DRONE_COMMIT_SHA:0:7} . -f {{ .input.dockerfile }}
     volumes:
       - name: build_env
         path: /build_env
