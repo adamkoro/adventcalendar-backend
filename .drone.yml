@@ -2,3 +2,40 @@ kind: template
 load: image-build.yaml
 data: 
   componentName: admin-api
+  dockerfile: admin-api/Dockerfile
+---
+kind: template
+load: image-build.yaml
+data: 
+  componentName: auth-api-init
+  dockerfile: auth-api-init/Dockerfile
+---
+kind: template
+load: image-build.yaml
+data: 
+  componentName: auth-api
+  dockerfile: auth-api/Dockerfile
+---
+kind: template
+load: image-build.yaml
+data: 
+  componentName: publisher-init
+  dockerfile: email-api/publisher-init/Dockerfile
+---
+kind: template
+load: image-build.yaml
+data: 
+  componentName: publisher
+  dockerfile: email-api/publisher/Dockerfile
+---
+kind: template
+load: image-build.yaml
+data: 
+  componentName: consumer
+  dockerfile: email-api/consumer/Dockerfile
+---
+kind: template
+load: image-build.yaml
+data: 
+  componentName: public-api
+  dockerfile: public-api/Dockerfile
