@@ -1,5 +1,5 @@
 kind: template
-load: image-build.yaml
+load: adventcalendar-backend-build.yaml
 data:
   components:
     - input:
@@ -12,13 +12,13 @@ data:
         componentName: admin-auth
         dockerfile: admin-auth/Dockerfile
     - input:
-        componentName: publisher-init
+        componentName: email/publisher-init
         dockerfile: email-api/publisher-init/Dockerfile
     - input:
-        componentName: publisher
+        componentName: email/publisher
         dockerfile: email-api/publisher/Dockerfile
     - input:
-        componentName: consumer
+        componentName: email/consumer
         dockerfile: email-api/consumer/Dockerfile
     - input:
         componentName: public-api
