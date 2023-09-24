@@ -1,13 +1,13 @@
 package api
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/adamkoro/adventcalendar-backend/lib/model"
 	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -17,52 +17,72 @@ var (
 
 func CreateUser(c *gin.Context) {
 	var data pg.CreateUserRequest
-
+	log.Debug().Msg("binding request body...")
 	if err := c.ShouldBindJSON(&data); err != nil {
-		errormessage := "Error binding JSON"
-		log.Println(errormessage+" : ", err.Error())
-		errorresp := model.ErrorResponse{Error: "invalid request body"}
-		c.JSON(http.StatusBadRequest, &errorresp)
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
 		return
 	}
+	log.Debug().Msg("binding request body successful")
+	log.Debug().Msg("validating request body...")
 	if validationErr := validate.Struct(&data); validationErr != nil {
+		log.Error().Msg(validationErr.Error())
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
 		return
 	}
-	err := Db.CreateUser(data.Username, data.Email, data.Password)
+	log.Debug().Msg("validation successful")
+	log.Debug().Msg("establishing connection to the database..")
+	err := Db.Ping()
 	if err != nil {
-		errormessage := "Error while creating user"
-		log.Println(errormessage+" : ", err.Error())
-		errorresp := model.ErrorResponse{Error: "error while creating user"}
-		c.JSON(http.StatusInternalServerError, &errorresp)
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "can not establish connection to the database"})
 		return
 	}
-	createuserresp := model.SuccessResponse{Status: "User created"}
-	c.JSON(http.StatusOK, &createuserresp)
+	log.Debug().Msg("establishing connection to the database successful")
+	log.Debug().Msg("creating user...")
+	err = Db.CreateUser(data.Username, data.Email, data.Password)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "while creating user"})
+		return
+	}
+	log.Debug().Msg("user created successfully")
+	c.JSON(http.StatusOK, model.SuccessResponse{Status: "user created successfully"})
 }
 
 func GetUser(c *gin.Context) {
 	var data pg.UserRequest
 	var getuserresp pg.UserResponse
+	log.Debug().Msg("binding request body...")
 	if err := c.ShouldBindJSON(&data); err != nil {
-		errormessage := "Error binding JSON"
-		log.Println(errormessage+" : ", err.Error())
-		errorresp := model.ErrorResponse{Error: "invalid request body"}
-		c.JSON(http.StatusBadRequest, &errorresp)
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
 		return
 	}
+	log.Debug().Msg("binding request body successful")
+	log.Debug().Msg("validating request body...")
 	if validationErr := validate.Struct(&data); validationErr != nil {
+		log.Error().Msg(validationErr.Error())
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
 		return
 	}
-	user, err := Db.GetUser(data.Username)
+	log.Debug().Msg("validation successful")
+	log.Debug().Msg("establishing connection to the database..")
+	err := Db.Ping()
 	if err != nil {
-		errormessage := "Error while getting user"
-		log.Println(errormessage+" : ", err.Error())
-		errorresp := model.ErrorResponse{Error: "error while getting user"}
-		c.JSON(http.StatusInternalServerError, &errorresp)
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "can not establish connection to the database"})
 		return
 	}
+	log.Debug().Msg("establishing connection to the database successful")
+	log.Debug().Msg("getting user...")
+	user, err := Db.GetUser(data.Username)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "while getting requested user"})
+		return
+	}
+	log.Debug().Msg("user retrieved successfully")
 	getuserresp.Id = int(user.Key)
 	getuserresp.Email = user.Email
 	getuserresp.Created = user.CreatedAt.String()
@@ -72,15 +92,23 @@ func GetUser(c *gin.Context) {
 
 func GetAllUsers(c *gin.Context) {
 	var getallusersresp []pg.UserResponse
-
-	users, err := Db.GetAllUsers()
+	log.Debug().Msg("establishing connection to the database..")
+	err := Db.Ping()
 	if err != nil {
-		errormessage := "Error while getting all users"
-		log.Println(errormessage+" : ", err.Error())
-		errorresp := model.ErrorResponse{Error: "error while getting all users"}
-		c.JSON(http.StatusInternalServerError, &errorresp)
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "can not establish connection to the database"})
 		return
 	}
+	log.Debug().Msg("establishing connection to the database successful")
+	log.Debug().Msg("getting all users...")
+	users, err := Db.GetAllUsers()
+	if err != nil {
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "while getting all users"})
+		return
+	}
+	log.Debug().Msg("all users retrieved successfully")
+	log.Debug().Msg("creating response...")
 	for _, user := range users {
 		var userresp pg.UserResponse
 		userresp.Id = int(user.Key)
@@ -90,66 +118,83 @@ func GetAllUsers(c *gin.Context) {
 		userresp.Modified = user.ModifiedAt.String()
 		getallusersresp = append(getallusersresp, userresp)
 	}
+	log.Debug().Msg("response created successfully")
 	c.JSON(http.StatusOK, &getallusersresp)
 }
 
 func UpdateUser(c *gin.Context) {
 	var data pg.UpdateUserRequest
-	var updateuserresp model.SuccessResponse
+	log.Debug().Msg("binding request body...")
 	if err := c.ShouldBindJSON(&data); err != nil {
-		errormessage := "Error binding JSON to struct"
-		log.Println(errormessage + ":" + err.Error())
-		errorresp := model.ErrorResponse{Error: "invalid request body"}
-		c.JSON(http.StatusBadRequest, &errorresp)
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
 		return
 	}
+	log.Debug().Msg("binding request body successful")
+	log.Debug().Msg("validating request body...")
 	if validationErr := validate.Struct(&data); validationErr != nil {
+		log.Error().Msg(validationErr.Error())
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
 		return
 	}
-	err := Db.UpdateUser(data.Username, data.Email, data.Password)
+	log.Debug().Msg("validation successful")
+	log.Debug().Msg("establishing connection to the database..")
+	err := Db.Ping()
 	if err != nil {
-		errormessage := "Error while updating user"
-		log.Println(errormessage + ":" + err.Error())
-		errorresp := model.ErrorResponse{Error: "error while updating user"}
-		c.JSON(http.StatusInternalServerError, &errorresp)
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "can not establish connection to the database"})
 		return
 	}
-	updateuserresp.Status = "User updated"
-	c.JSON(http.StatusOK, &updateuserresp)
+	log.Debug().Msg("establishing connection to the database successful")
+	log.Debug().Msg("updating user...")
+	err = Db.UpdateUser(data.Username, data.Email, data.Password)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "while updating user"})
+		return
+	}
+	log.Debug().Msg("user updated successfully")
+	c.JSON(http.StatusOK, model.SuccessResponse{Status: "user updated successfully"})
 }
 
 func DeleteUser(c *gin.Context) {
 	var data pg.UserRequest
-	var errorresp model.ErrorResponse
-	var deleteuserresp model.SuccessResponse
-
+	log.Debug().Msg("binding request body...")
 	if err := c.ShouldBindJSON(&data); err != nil {
-		errormessage := "Error binding JSON to struct"
-		log.Println(errormessage + ":" + err.Error())
-		errorresp.Error = errormessage
-		c.JSON(http.StatusBadRequest, "invalid request body")
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
 		return
 	}
+	log.Debug().Msg("binding request body successful")
+	log.Debug().Msg("validating request body...")
 	if validationErr := validate.Struct(&data); validationErr != nil {
+		log.Error().Msg(validationErr.Error())
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
 		return
 	}
-	if data.Username == "admin" {
-		errormessage := "Cannot delete admin user"
-		log.Println(errormessage)
-		errorresp.Error = errormessage
-		c.JSON(http.StatusBadRequest, "cannot delete admin user")
-		return
-	}
-	err := Db.DeleteUser(data.Username)
+	log.Debug().Msg("validation successful")
+	log.Debug().Msg("establishing connection to the database..")
+	err := Db.Ping()
 	if err != nil {
-		errormessage := "Error while deleting user"
-		log.Println(errormessage + ":" + err.Error())
-		errorresp.Error = errormessage
-		c.JSON(http.StatusInternalServerError, "error while deleting user")
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "can not establish connection to the database"})
 		return
 	}
-	deleteuserresp.Status = "User deleted"
-	c.JSON(http.StatusOK, &deleteuserresp)
+	log.Debug().Msg("establishing connection to the database successful")
+	log.Debug().Msg("checking if user is not admin...")
+	if data.Username == "admin" {
+		log.Error().Msg("can not delete admin user")
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "can not delete admin user"})
+		return
+	}
+	log.Debug().Msg("user is not admin")
+	log.Debug().Msg("deleting user...")
+	err = Db.DeleteUser(data.Username)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "while deleting user"})
+		return
+	}
+	log.Debug().Msg("user deleted successfully")
+	c.JSON(http.StatusOK, model.SuccessResponse{Status: "user deleted successfully"})
 }

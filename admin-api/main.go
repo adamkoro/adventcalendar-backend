@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +15,8 @@ import (
 	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -23,32 +24,61 @@ var (
 	httpPort    int
 	metricsPort int
 	db          pg.Repository
-	//redisConn   *redis.Client
 )
 
 func main() {
 	figure.NewFigure("AdventCalendar Admin Api", "big", false).Print()
+	/////////////////////////
+	// Environment variables
+	/////////////////////////
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
+	/////////////////////////
+	// Logger setup
+	/////////////////////////
+	logLevel := env.GetLogLevel()
+	switch logLevel {
+	case "panic":
+		zerolog.SetGlobalLevel(zerolog.PanicLevel)
+	case "fatal":
+		zerolog.SetGlobalLevel(zerolog.FatalLevel)
+	case "error":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	case "info":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	case "debug":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case "warn":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+	/////////////////////////
 	// Postgres connection check
+	/////////////////////////
 	go func() {
 		var isConnected bool
+		log.Debug().Msg("establishing connection to the postgres...")
 		postgresConn, err := createPostgresConnection()
+		if err != nil {
+			log.Error().Msg(err.Error())
+		} else {
+			log.Info().Msg("connected to the postgres")
+		}
 		ctx := context.Background()
 		db := pg.NewRepository(postgresConn, &ctx)
-		if err != nil {
-			log.Println(err)
-		}
 		isConnected = true
-		log.Println("Connected to the postgres.")
 		for {
+			log.Debug().Msg("pinging the postgres...")
 			err := db.Ping()
 			if err != nil {
-				log.Println("Lost connection to the postgres, reconnecting...")
+				log.Info().Msg("lost connection to the postgres, reconnecting...")
+				log.Error().Msg(err.Error())
 				isConnected = false
 			} else {
+				log.Debug().Msg("pinging the postgres successful")
 				if !isConnected {
-					log.Println("Reconnected to the postgres.")
+					log.Info().Msg("reconnected to the postgres")
 					isConnected = true
 				}
 			}
@@ -56,41 +86,16 @@ func main() {
 			time.Sleep(5 * time.Second)
 		}
 	}()
-
-	// Redis connection check
-	/*go func() {
-		var isConnected bool
-		redisConn = createRedisConnection()
-		if redisConn != nil {
-			isConnected = true
-			log.Println("Connected to the redis.")
-		}
-		for {
-			err := rd.Ping(redisConn)
-			if err != nil {
-				log.Println("Lost connection to the redis, reconnecting...")
-				redisConn = createRedisConnection()
-				if err != nil {
-					isConnected = false
-					log.Println("Failed to reconnect to the redis.")
-				}
-			} else {
-				if !isConnected {
-					log.Println("Reconnected to the redis.")
-					isConnected = true
-				}
-			}
-			time.Sleep(5 * time.Second)
-		}
-	}()*/
-
-	// Api server
+	/////////////////////////
+	// Api server setup
+	/////////////////////////
 	router := gin.New()
 	router.Use(gin.Recovery())
-	router.Use(gin.Logger())
 	if gin.Mode() == gin.DebugMode {
 		router.Use(endpoints.CORSMiddleware())
 	}
+	router.Use(endpoints.SetJsonLogger())
+	log.Debug().Msg("setting up endpoints...")
 	api := router.Group("/api")
 	{
 		// Public endpoints
@@ -115,9 +120,14 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
-	// Metrics server
+	log.Debug().Msg("setting up endpoints successful")
+	/////////////////////////
+	// Metrics server setup
+	/////////////////////////
 	metrics := gin.New()
+	metrics.Use(gin.Recovery())
+	metrics.Use(endpoints.SetJsonLogger())
+	log.Debug().Msg("setting up metrics...")
 	metrics.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	metrics_server := &http.Server{
 		Addr:         ":" + strconv.Itoa(metricsPort),
@@ -125,37 +135,46 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
-	log.Println("Starting server...")
-	log.Println("Listening api on port " + strconv.Itoa(httpPort))
-	log.Println("Listening metrics on port " + strconv.Itoa(metricsPort))
+	log.Debug().Msg("setting up metrics successful")
+	/////////////////////////
+	// Server info
+	/////////////////////////
+	log.Info().Msg("starting server...")
+	log.Info().Msg("listening api on port " + strconv.Itoa(httpPort))
+	log.Info().Msg("listening metrics on port " + strconv.Itoa(metricsPort))
+	/////////////////////////
+	// Api server start
+	/////////////////////////
 	go func() {
-		// api
 		if err := api_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			log.Panic().Msg("api listen: " + err.Error())
 		}
 	}()
+	/////////////////////////
+	// Metrics server start
+	/////////////////////////
 	go func() {
-		// metrics
 		if err := metrics_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			log.Panic().Msg("metrics listen: " + err.Error())
 		}
 	}()
-
+	/////////////////////////
+	// Graceful shutdown
+	/////////////////////////
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutdown Server ...")
+	log.Info().Msg("shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := api_server.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown:", err)
+		log.Error().Msg("server shutdown: " + err.Error())
 	}
 	select {
 	case <-ctx.Done():
-		log.Println("timeout of 5 seconds.")
+		log.Info().Msg("timeout of 5 seconds")
 	}
-	log.Println("Server exiting")
+	log.Info().Msg("server exiting")
 }
 
 func createPostgresConnection() (*gorm.DB, error) {
