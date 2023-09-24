@@ -1,15 +1,43 @@
 # adventcalendar-backend
+![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+![RabbitMQ](https://img.shields.io/badge/Rabbitmq-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
+
+![Suse](https://img.shields.io/badge/SUSE-0C322C?style=for-the-badge&logo=SUSE&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white)
+![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
+
+[![Build Status](https://drone.adamkoro.com/api/badges/adamkoro/adventcalendar-backend/status.svg?ref=refs/heads/main)](https://drone.adamkoro.com/adamkoro/adventcalendar-backend)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)]()
+
+| Component | Code report |
+| ------ | ------ |
+| Admin Api | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/admin-api)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/admin-api) |
+| Auth Api Init | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/auth-api-init)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/auth-api-init) |
+| Auth Api | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/auth-api)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/auth-api) |
+| Publisher Init | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/email-api/publisher-init)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/email-api/publisher-init) |
+| Publisher | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/email-api/publisher)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/email-api/publisher) |
+| Consumer | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/email-api/consumer)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/email-api/consumer) |
+| Public Api | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/public-api)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/email-api/public-api) |
+
+| Library | Code report |
+| ------ | ------ |
+| Env | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/lib/env)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/lib/env) |
+| JWT | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/lib/jwt)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/lib/jwt) |
+| MariaDB | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/lib/mariadb)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/lib/mariadb) |
+| MongoDB | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/lib/mongo)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/lib/mongo) |
+| Postgres | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/lib/postgres)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/lib/postgres) |
+| RabbitMQ | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/lib/rabbitmq)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/lib/rabbitmq) |
+| Redis | [![Go Report Card](https://goreportcard.com/badge/github.com/adamkoro/adventcalendar-backend/lib/redis)](https://goreportcard.com/report/github.com/adamkoro/adventcalendar-backend/lib/redis) |
 
 ## Build Requirements (dev environment)
 - Golang 1.20.3
 - Docker 20.10.25
 - Docker-compose 1.29.2
-
-## Components
-- PostgreSQL
-- Redis
-- RabbitMQ
-- MariaDB
 
 ## Environment variables
 
