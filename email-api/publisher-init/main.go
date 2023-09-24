@@ -43,7 +43,7 @@ func main() {
 	// Mariadb connection check
 	/////////////////////////
 	for {
-		log.Debug().Msg("establishing connection to the mariadb...")
+		log.Info().Msg("establishing connection to the mariadb...")
 		mariadbConn, err := db.Connect(env.GetDbUser(), env.GetDbPassword(), env.GetDbHost(), env.GetDbName(), env.GetDbPort())
 		if err != nil {
 			log.Debug().Msg(err.Error())
@@ -59,7 +59,7 @@ func main() {
 		} else {
 			isConnected = true
 			log.Debug().Msg("pinging the mariadb successful")
-			log.Debug().Msg("establishing connection to the mariadb successful")
+			log.Info().Msg("establishing connection to the mariadb successful")
 			if !isConnected {
 				log.Info().Msg("reconnected to the mariadb")
 				isConnected = true
@@ -77,7 +77,7 @@ func main() {
 			}
 			log.Info().Msg("database struct migration successful")
 			/////////////////////////
-			// Check if default email exists
+			// Check if default email exists if not create it
 			/////////////////////////
 			log.Debug().Msg("checking if default email exists...")
 			_, err = db.GetEmailByName("default")

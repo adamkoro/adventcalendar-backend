@@ -18,7 +18,6 @@ var (
 
 func main() {
 	figure.NewFigure("AdventCalendar Auth Api Init", "big", false).Print()
-	// Postgres connection
 	/////////////////////////
 	// Logger setup
 	/////////////////////////
@@ -43,7 +42,7 @@ func main() {
 	// Postgres connection check
 	/////////////////////////
 	for {
-		log.Debug().Msg("establishing connection to the postgres...")
+		log.Info().Msg("establishing connection to the postgres...")
 		postgresConn, err := db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
 		if err != nil {
 			log.Error().Msg(err.Error())
@@ -59,7 +58,7 @@ func main() {
 		} else {
 			isConnected = true
 			log.Debug().Msg("pinging the postgres successful")
-			log.Debug().Msg("establishing connection to the postgres successful")
+			log.Info().Msg("establishing connection to the postgres successful")
 			if !isConnected {
 				log.Info().Msg("reconnected to the postgres")
 				isConnected = true
