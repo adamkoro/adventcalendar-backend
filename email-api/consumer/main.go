@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/smtp"
 	"os"
@@ -15,9 +14,12 @@ import (
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	rabbitMQ "github.com/adamkoro/adventcalendar-backend/lib/rabbitmq"
 	"github.com/common-nighthawk/go-figure"
+	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -31,52 +33,78 @@ var (
 
 func main() {
 	figure.NewFigure("AdventCalendar Email Consumer", "big", false).Print()
+	/////////////////////////
+	// Environment variables
+	/////////////////////////
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
+	/////////////////////////
+	// Logger setup
+	/////////////////////////
+	logLevel := env.GetLogLevel()
+	switch logLevel {
+	case "panic":
+		zerolog.SetGlobalLevel(zerolog.PanicLevel)
+	case "fatal":
+		zerolog.SetGlobalLevel(zerolog.FatalLevel)
+	case "error":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	case "info":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	case "debug":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case "warn":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+	/////////////////////////
+	// RabbitMQ connection check
+	/////////////////////////
 	go func() {
 		var err error
 		var wait time.Duration = 5 * time.Second
 		rabbitConn, err = createRabbitMqConnection()
 		if err != nil {
-			log.Println(err)
+			log.Error().Msg(err.Error())
 		} else {
-			log.Println("Connected to the rabbitmq.")
+			log.Info().Msg("connected to the rabbitmq")
 			channel, err = rabbitMQ.CreateChannel(rabbitConn)
 			if err != nil {
-				log.Println(err)
+				log.Error().Msg(err.Error())
 			}
-			log.Println("Channel created.")
+			log.Debug().Msg("channel created")
 			queue, err = rabbitMQ.DeclareQueue(channel, "email")
 			if err != nil {
-				log.Println(err)
+				log.Error().Msg(err.Error())
 			}
-			log.Println("Queue declared.")
+			log.Debug().Msg("queue declared")
 			consume, err = rabbitMQ.Consume(channel, queue.Name)
 			if err != nil {
-				log.Println(err)
+				log.Error().Msg(err.Error())
 			}
 		}
 		for {
 			if rabbitConn == nil || rabbitConn.IsClosed() {
-				log.Println("Lost connection to the rabbitmq, reconnecting...")
+				log.Error().Msg("connection closed, reconnecting...")
 				rabbitConn, err = createRabbitMqConnection()
 				if err != nil {
-					log.Println(err)
+					log.Error().Msg(err.Error())
 				} else {
-					log.Println("Reconnected to the rabbitmq.")
+					log.Info().Msg("connected to the rabbitmq")
 					channel, err = rabbitMQ.CreateChannel(rabbitConn)
 					if err != nil {
-						log.Println(err)
+						log.Error().Msg(err.Error())
 					}
-					log.Println("Channel created.")
+					log.Debug().Msg("channel created")
 					queue, err = rabbitMQ.DeclareQueue(channel, "email")
 					if err != nil {
-						log.Println(err)
+						log.Error().Msg(err.Error())
 					}
-					log.Println("Queue declared.")
+					log.Debug().Msg("queue declared")
 					consume, err = rabbitMQ.Consume(channel, queue.Name)
 					if err != nil {
-						log.Println(err)
+						log.Error().Msg(err.Error())
 					}
 				}
 			}
@@ -84,7 +112,7 @@ func main() {
 				notify := rabbitConn.NotifyClose(make(chan *amqp.Error))
 				select {
 				case err = <-notify:
-					log.Println("Connection closed, reconnecting...")
+					log.Error().Msg(err.Error())
 					rabbitConn = nil
 				case <-time.After(5 * time.Second):
 					// Check the connection every 5 seconds
@@ -96,25 +124,34 @@ func main() {
 			}
 		}
 	}()
+	/////////////////////////
+	// RabbitMQ consume messages
+	/////////////////////////
 	go func() {
 		for d := range consume {
 			var message rabbitMQ.MQMessage
 			err := json.Unmarshal(d.Body, &message)
 			if err != nil {
-				log.Println(err)
+				log.Error().Msg(err.Error())
 			}
-			log.Println("Message received")
+			log.Info().Msg("email received")
 			err = sendMail(env.GetSmtpAuth(), env.GetSmtpHost(), env.GetSmtpPort(), env.GetSmtpUser(), env.GetSmtpPassword(), env.GetSmtpFrom(), message.EmailTo, message.Subject, message.Message)
 			if err != nil {
-				log.Println(err)
+				log.Error().Msg(err.Error())
 			}
-			log.Println("Email sent")
+			log.Info().Msg("email sent")
 		}
 	}()
-	// Api server
+	/////////////////////////
+	// Api server setup
+	/////////////////////////
 	router := gin.New()
 	router.Use(gin.Recovery())
-	router.Use(gin.Logger())
+	router.Use(logger.SetLogger(
+		logger.WithLogger(func(_ *gin.Context, l zerolog.Logger) zerolog.Logger {
+			return l.Output(gin.DefaultWriter).With().Logger()
+		})))
+	log.Debug().Msg("setting up endpoints...")
 	api := router.Group("/api")
 	{
 		// Public endpoints
@@ -132,9 +169,12 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
-	// Metrics server
+	log.Debug().Msg("setting up endpoints successful")
+	/////////////////////////
+	// Metrics server setup
+	/////////////////////////
 	metrics := gin.New()
+	log.Debug().Msg("setting up metrics endpoints...")
 	metrics.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	metrics_server := &http.Server{
 		Addr:         ":" + strconv.Itoa(metricsPort),
@@ -142,37 +182,46 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
-	log.Println("Starting server...")
-	log.Println("Listening api on port " + strconv.Itoa(httpPort))
-	log.Println("Listening metrics on port " + strconv.Itoa(metricsPort))
+	log.Debug().Msg("setting up metrics endpoints successful")
+	/////////////////////////
+	// Server info
+	/////////////////////////
+	log.Info().Msg("starting server...")
+	log.Info().Msg("listening api on port " + strconv.Itoa(httpPort))
+	log.Info().Msg("listening metrics on port " + strconv.Itoa(metricsPort))
+	/////////////////////////
+	// Api server start
+	/////////////////////////
 	go func() {
-		// api
 		if err := api_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			log.Panic().Msg("api listen: " + err.Error())
 		}
 	}()
+	/////////////////////////
+	// Metrics server start
+	/////////////////////////
 	go func() {
-		// metrics
 		if err := metrics_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			log.Panic().Msg("metrics listen: " + err.Error())
 		}
 	}()
-
+	/////////////////////////
+	// Graceful shutdown
+	/////////////////////////
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutdown Server ...")
+	log.Info().Msg("shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := api_server.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown:", err)
+		log.Error().Msg("server shutdown: " + err.Error())
 	}
 	select {
 	case <-ctx.Done():
-		log.Println("timeout of 5 seconds.")
+		log.Info().Msg("timeout of 5 seconds")
 	}
-	log.Println("Server exiting")
+	log.Info().Msg("server exiting")
 }
 
 func createRabbitMqConnection() (*amqp.Connection, error) {
