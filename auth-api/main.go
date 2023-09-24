@@ -12,6 +12,7 @@ import (
 	endpoints "github.com/adamkoro/adventcalendar-backend/auth-api/api"
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
+	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
@@ -26,6 +27,7 @@ var (
 )
 
 func main() {
+	figure.NewFigure("AdventCalendar Auth Api", "big", false).Print()
 	/////////////////////////
 	// Environment variables
 	/////////////////////////
@@ -63,11 +65,8 @@ func main() {
 		} else {
 			log.Info().Msg("connected to the postgres")
 		}
-		log.Debug().Msg("establishing connection to the postgres successful")
 		ctx := context.Background()
-		log.Debug().Msg("creating postgres repository...")
 		db := pg.NewRepository(postgresConn, &ctx)
-		log.Debug().Msg("creating postgres repository successful")
 		isConnected = true
 		for {
 			log.Debug().Msg("pinging the postgres...")

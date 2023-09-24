@@ -15,6 +15,7 @@ require (
 	github.com/adamkoro/adventcalendar-backend/lib/jwt v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/model v0.0.0-00010101000000-000000000000
 	github.com/adamkoro/adventcalendar-backend/lib/postgres v0.0.0-00010101000000-000000000000
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/gin-contrib/logger v0.2.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.14.1
