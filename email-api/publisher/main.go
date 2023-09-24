@@ -195,6 +195,7 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+	log.Debug().Msg("setting up metrics endpoints successful")
 	/////////////////////////
 	// Server info
 	/////////////////////////
