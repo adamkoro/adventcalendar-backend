@@ -34,52 +34,59 @@ func main() {
 	metricsPort = env.GetMetricsPort()
 	// RabbitMQ connection check
 	go func() {
-		//var isConnected bool
-		var channel *amqp.Channel
-		var queue amqp.Queue
-		rabbitConn, err := createRabbitMqConnection()
+		var err error
+		var wait time.Duration = 5 * time.Second
+		rabbitConn, err = createRabbitMqConnection()
 		if err != nil {
 			log.Println(err)
-		}
-		//isConnected = true
-		channel, err = rabbitMQ.CreateChannel(rabbitConn)
-		if err != nil {
-			log.Println(err)
-		}
-		log.Println("Connected to the rabbitmq.")
-		log.Println("Channel created.")
-		queue, err = rabbitMQ.DeclareQueue(channel, "email")
-		if err != nil {
-			log.Println(err)
-		}
-		log.Println("Queue declared.")
-		endpoints.MqChannel = channel
-		endpoints.MqQUeue = queue
-		/*for {
-			pingConn, err := createRabbitMqConnection()
+		} else {
+			log.Println("Connected to the rabbitmq.")
+			endpoints.MqChannel, err = rabbitMQ.CreateChannel(rabbitConn)
 			if err != nil {
+				log.Println(err)
+			}
+			log.Println("Channel created.")
+			endpoints.MqQUeue, err = rabbitMQ.DeclareQueue(endpoints.MqChannel, "email")
+			if err != nil {
+				log.Println(err)
+			}
+			log.Println("Queue declared.")
+		}
+		for {
+			if rabbitConn == nil || rabbitConn.IsClosed() {
 				log.Println("Lost connection to the rabbitmq, reconnecting...")
 				rabbitConn, err = createRabbitMqConnection()
 				if err != nil {
-					isConnected = false
-					log.Println("Failed to reconnect to the rabbitmq.")
-				}
-			} else {
-				if !isConnected {
+					log.Println(err)
+				} else {
 					log.Println("Reconnected to the rabbitmq.")
-					isConnected = true
-					channel, err := rabbitMQ.CreateChannel(rabbitConn)
+					endpoints.MqChannel, err = rabbitMQ.CreateChannel(rabbitConn)
 					if err != nil {
 						log.Println(err)
 					}
-					endpoints.MqChannel = channel
+					log.Println("Channel created.")
+					endpoints.MqQUeue, err = rabbitMQ.DeclareQueue(endpoints.MqChannel, "email")
+					if err != nil {
+						log.Println(err)
+					}
+					log.Println("Queue declared.")
 				}
 			}
-			rabbitMQ.CloseConnection(pingConn)
-			endpoints.MqChannel = channel
-			endpoints.MqQUeue = queue
-			time.Sleep(5 * time.Second)
-		}*/
+			if rabbitConn != nil {
+				notify := rabbitConn.NotifyClose(make(chan *amqp.Error))
+				select {
+				case err = <-notify:
+					log.Println("Connection closed, reconnecting...")
+					rabbitConn = nil
+				case <-time.After(5 * time.Second):
+					// Check the connection every 5 seconds
+				}
+			}
+			if rabbitConn == nil {
+				// Wait before attempting to reconnect
+				time.Sleep(wait)
+			}
+		}
 	}()
 	// MariaDB connection check
 	go func() {

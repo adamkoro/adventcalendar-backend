@@ -24,7 +24,7 @@ var (
 	rabbitConn  *amqp.Connection
 	channel     *amqp.Channel
 	queue       amqp.Queue
-	forever     chan struct{}
+	consume     <-chan amqp.Delivery
 	httpPort    int
 	metricsPort int
 )
@@ -33,26 +33,69 @@ func main() {
 	figure.NewFigure("AdventCalendar Email Consumer", "big", false).Print()
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
-	rabbitConn, err := createRabbitMqConnection()
-	if err != nil {
-		log.Println(err)
-	}
-	//isConnected = true
-	channel, err = rabbitMQ.CreateChannel(rabbitConn)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("Connected to the rabbitmq.")
-	log.Println("Channel created.")
-	queue, err = rabbitMQ.DeclareQueue(channel, "email")
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("Queue declared.")
-	consume, err := rabbitMQ.Consume(channel, queue.Name)
-	if err != nil {
-		log.Println(err)
-	}
+	go func() {
+		var err error
+		var wait time.Duration = 5 * time.Second
+		rabbitConn, err = createRabbitMqConnection()
+		if err != nil {
+			log.Println(err)
+		} else {
+			log.Println("Connected to the rabbitmq.")
+			channel, err = rabbitMQ.CreateChannel(rabbitConn)
+			if err != nil {
+				log.Println(err)
+			}
+			log.Println("Channel created.")
+			queue, err = rabbitMQ.DeclareQueue(channel, "email")
+			if err != nil {
+				log.Println(err)
+			}
+			log.Println("Queue declared.")
+			consume, err = rabbitMQ.Consume(channel, queue.Name)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		for {
+			if rabbitConn == nil || rabbitConn.IsClosed() {
+				log.Println("Lost connection to the rabbitmq, reconnecting...")
+				rabbitConn, err = createRabbitMqConnection()
+				if err != nil {
+					log.Println(err)
+				} else {
+					log.Println("Reconnected to the rabbitmq.")
+					channel, err = rabbitMQ.CreateChannel(rabbitConn)
+					if err != nil {
+						log.Println(err)
+					}
+					log.Println("Channel created.")
+					queue, err = rabbitMQ.DeclareQueue(channel, "email")
+					if err != nil {
+						log.Println(err)
+					}
+					log.Println("Queue declared.")
+					consume, err = rabbitMQ.Consume(channel, queue.Name)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+			}
+			if rabbitConn != nil {
+				notify := rabbitConn.NotifyClose(make(chan *amqp.Error))
+				select {
+				case err = <-notify:
+					log.Println("Connection closed, reconnecting...")
+					rabbitConn = nil
+				case <-time.After(5 * time.Second):
+					// Check the connection every 5 seconds
+				}
+			}
+			if rabbitConn == nil {
+				// Wait before attempting to reconnect
+				time.Sleep(wait)
+			}
+		}
+	}()
 	go func() {
 		for d := range consume {
 			var message rabbitMQ.MQMessage
@@ -80,8 +123,6 @@ func main() {
 			c.JSON(http.StatusOK, gin.H{"message": "pong"})
 		})
 		api.GET("/health", func(c *gin.Context) {
-			if env.GetSmtpAuth() {
-			}
 			c.JSON(http.StatusOK, gin.H{"message": "ok"})
 		})
 	}
