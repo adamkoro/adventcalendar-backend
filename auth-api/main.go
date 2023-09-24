@@ -56,7 +56,7 @@ func main() {
 	/////////////////////////
 	go func() {
 		var isConnected bool
-		log.Debug().Msg("establishing connection to the postgres..")
+		log.Debug().Msg("establishing connection to the postgres...")
 		postgresConn, err := createPostgresConnection()
 		if err != nil {
 			log.Error().Msg(err.Error())
@@ -65,12 +65,12 @@ func main() {
 		}
 		log.Debug().Msg("establishing connection to the postgres successful")
 		ctx := context.Background()
-		log.Debug().Msg("creating postgres repository..")
+		log.Debug().Msg("creating postgres repository...")
 		db := pg.NewRepository(postgresConn, &ctx)
 		log.Debug().Msg("creating postgres repository successful")
 		isConnected = true
 		for {
-			log.Debug().Msg("pinging the postgres..")
+			log.Debug().Msg("pinging the postgres...")
 			err := db.Ping()
 			if err != nil {
 				log.Info().Msg("lost connection to the postgres, reconnecting...")
