@@ -37,6 +37,3 @@ data:
         linodeRegion: it-mil
         componentName: public-api
         dockerfile: public-api/Dockerfile
-when:
-    event:
-    - manual
