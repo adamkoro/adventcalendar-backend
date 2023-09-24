@@ -5,6 +5,14 @@ import (
 	"strconv"
 )
 
+func GetLogLevel() string {
+	logLevel := "info"
+	if os.Getenv("LOG_LEVEL") != "" {
+		logLevel = os.Getenv("LOG_LEVEL")
+	}
+	return logLevel
+}
+
 func GetSecretKey() string {
 	secret := "secret"
 	if os.Getenv("SECRET_KEY") != "" {
