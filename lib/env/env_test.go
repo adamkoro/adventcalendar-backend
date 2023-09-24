@@ -7,6 +7,18 @@ import (
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 )
 
+func TestGetLogLevel(t *testing.T) {
+	os.Setenv("LOG_LEVEL", "debug")
+	defer os.Unsetenv("LOG_LEVEL")
+
+	expected := "debug"
+	actual := env.GetLogLevel()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
 func TestGetHttpPort(t *testing.T) {
 	os.Setenv("PORT", "8080")
 	defer os.Unsetenv("PORT")
@@ -100,30 +112,6 @@ func TestGetDbSslMode(t *testing.T) {
 
 	if actual != expected {
 		t.Errorf("expected %s, got %s", expected, actual)
-	}
-}
-
-func TestGetDbMaxIdleConns(t *testing.T) {
-	os.Setenv("DB_MAX_IDLE_CONNS", "10")
-	defer os.Unsetenv("DB_MAX_IDLE_CONNS")
-
-	expected := 10
-	actual := env.GetDbMaxIdleConns()
-
-	if actual != expected {
-		t.Errorf("expected %d, got %d", expected, actual)
-	}
-}
-
-func TestGetDbMaxOpenConns(t *testing.T) {
-	os.Setenv("DB_MAX_OPEN_CONNS", "10")
-	defer os.Unsetenv("DB_MAX_OPEN_CONNS")
-
-	expected := 10
-	actual := env.GetDbMaxOpenConns()
-
-	if actual != expected {
-		t.Errorf("expected %d, got %d", expected, actual)
 	}
 }
 
