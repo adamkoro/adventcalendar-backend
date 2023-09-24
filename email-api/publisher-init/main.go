@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	figure.NewFigure("AdventCalendar Email Publisher", "big", false).Print()
+	figure.NewFigure("AdventCalendar Email Publisher Init", "big", false).Print()
 	// MariaDB connection
 	log.Println("Connecting to the MariaDB...")
 	var db *md.Repository
