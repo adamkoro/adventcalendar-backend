@@ -42,28 +42,24 @@ func main() {
 	/////////////////////////
 	// Mariadb connection check
 	/////////////////////////
-	log.Debug().Msg("establishing connection to the mariadb...")
-	mariadbConn, err := db.Connect(env.GetDbUser(), env.GetDbPassword(), env.GetDbHost(), env.GetDbName(), env.GetDbPort())
-	if err != nil {
-		log.Error().Msg(err.Error())
-	} else {
-		log.Info().Msg("connected to the mariadb")
-	}
-	log.Debug().Msg("establishing connection to the mariadb successful")
-	ctx := context.Background()
-	log.Debug().Msg("creating mariadb repository...")
-	db := md.NewRepository(mariadbConn, &ctx)
-	log.Debug().Msg("creating mariadb repository successful")
-	isConnected = true
 	for {
+		log.Debug().Msg("establishing connection to the mariadb...")
+		mariadbConn, err := db.Connect(env.GetDbUser(), env.GetDbPassword(), env.GetDbHost(), env.GetDbName(), env.GetDbPort())
+		if err != nil {
+			log.Debug().Msg(err.Error())
+		}
+		ctx := context.Background()
+		db := md.NewRepository(mariadbConn, &ctx)
 		log.Debug().Msg("pinging the mariadb...")
-		err := db.Ping()
+		err = db.Ping()
 		if err != nil {
 			log.Info().Msg("lost connection to the mariadb, reconnecting...")
 			log.Error().Msg(err.Error())
 			isConnected = false
 		} else {
+			isConnected = true
 			log.Debug().Msg("pinging the mariadb successful")
+			log.Debug().Msg("establishing connection to the mariadb successful")
 			if !isConnected {
 				log.Info().Msg("reconnected to the mariadb")
 				isConnected = true
@@ -104,12 +100,12 @@ func main() {
 				log.Info().Msg("default email exists")
 			}
 			log.Info().Msg("all required actions completed successfully")
-			log.Debug().Msg("closing connection to the postgres...")
+			log.Debug().Msg("closing connection to the mariadb...")
 			/////////////////////////
 			// Close connection
 			/////////////////////////
 			db.Close()
-			log.Debug().Msg("closing connection to the postgres successful")
+			log.Debug().Msg("closing connection to the mariadb successful")
 			break
 		}
 	}
