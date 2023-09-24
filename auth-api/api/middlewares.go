@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
@@ -10,23 +9,20 @@ import (
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func AuthRequired(c *gin.Context) {
 	cookie, err := c.Cookie("token")
 	if err != nil {
-		errormessage := "Error getting cookie: " + err.Error()
-		log.Println(errormessage)
-		errorresp := custModel.ErrorResponse{Error: "cookie not found, please login again"}
-		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
+		log.Error().Msg(err.Error())
+		c.AbortWithStatusJSON(http.StatusUnauthorized, custModel.ErrorResponse{Error: "cookie not found, please login again"})
 		return
 	}
 	_, err = custJWT.ValidateJWT(cookie, env.GetSecretKey())
 	if err != nil {
-		errormessage := "Error validating JWT: " + err.Error()
-		log.Println(errormessage)
-		errorresp := custModel.ErrorResponse{Error: "invalid token, please login again"}
-		c.AbortWithStatusJSON(http.StatusUnauthorized, &errorresp)
+		log.Error().Msg(err.Error())
+		c.AbortWithStatusJSON(http.StatusUnauthorized, custModel.ErrorResponse{Error: "invalid token, please login again"})
 		return
 	}
 	c.Next()
@@ -41,18 +37,16 @@ func SetJsonLogger() gin.HandlerFunc {
 }
 
 func CORSMiddleware() gin.HandlerFunc {
-	log.Println("CORS enabled")
+	log.Info().Msg("setting up CORS middleware")
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3030")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, Access-Control-Allow-Credentials")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
 		}
-
 		c.Next()
 	}
 }

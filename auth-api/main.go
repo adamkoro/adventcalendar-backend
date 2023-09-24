@@ -14,6 +14,8 @@ import (
 	pg "github.com/adamkoro/adventcalendar-backend/lib/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -24,29 +26,60 @@ var (
 )
 
 func main() {
+	/////////////////////////
+	// Environment variables
+	/////////////////////////
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
+	/////////////////////////
+	// Logger setup
+	/////////////////////////
+	logLevel := env.GetLogLevel()
+	switch logLevel {
+	case "panic":
+		zerolog.SetGlobalLevel(zerolog.PanicLevel)
+	case "fatal":
+		zerolog.SetGlobalLevel(zerolog.FatalLevel)
+	case "error":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	case "info":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	case "debug":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case "warn":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+	/////////////////////////
 	// Postgres connection check
+	/////////////////////////
 	go func() {
 		var isConnected bool
+		log.Debug().Msg("establishing connection to the postgres..")
 		postgresConn, err := createPostgresConnection()
 		if err != nil {
-			//log.Println(err)
+			log.Error().Msg(err.Error())
 		} else {
-			//log.Println("Connected to the postgres.")
+			log.Info().Msg("connected to the postgres")
 		}
+		log.Debug().Msg("establishing connection to the postgres successful")
 		ctx := context.Background()
+		log.Debug().Msg("creating postgres repository..")
 		db := pg.NewRepository(postgresConn, &ctx)
-
+		log.Debug().Msg("creating postgres repository successful")
 		isConnected = true
 		for {
+			log.Debug().Msg("pinging the postgres..")
 			err := db.Ping()
 			if err != nil {
-				//log.Println("Lost connection to the postgres, reconnecting...")
+				log.Info().Msg("lost connection to the postgres, reconnecting...")
+				log.Error().Msg(err.Error())
 				isConnected = false
 			} else {
+				log.Debug().Msg("pinging the postgres successful")
 				if !isConnected {
-					//log.Println("Reconnected to the postgres.")
+					log.Info().Msg("reconnected to the postgres")
 					isConnected = true
 				}
 			}
@@ -54,8 +87,9 @@ func main() {
 			time.Sleep(5 * time.Second)
 		}
 	}()
-
-	// Api server
+	/////////////////////////
+	// Api server setup
+	/////////////////////////
 	router := gin.New()
 	router.Use(gin.Recovery())
 	if gin.Mode() == gin.DebugMode {
@@ -63,6 +97,7 @@ func main() {
 	}
 	router.Use(endpoints.SetJsonLogger())
 	// Swagger
+	log.Debug().Msg("setting up endpoints...")
 	router.StaticFile("/swagger/doc.json", "./docs/swagger.json")
 	api := router.Group("/api")
 	{
@@ -82,9 +117,14 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
-	// Metrics server
+	log.Debug().Msg("setting up endpoints successful")
+	/////////////////////////
+	// Metrics server setup
+	/////////////////////////
 	metrics := gin.New()
+	metrics.Use(gin.Recovery())
+	metrics.Use(endpoints.SetJsonLogger())
+	log.Debug().Msg("setting up metrics endpoints...")
 	metrics.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	metrics_server := &http.Server{
 		Addr:         ":" + strconv.Itoa(metricsPort),
@@ -92,37 +132,46 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
-	//log.Println("Starting server...")
-	//log.Println("Listening api on port " + strconv.Itoa(httpPort))
-	//log.Println("Listening metrics on port " + strconv.Itoa(metricsPort))
+	log.Debug().Msg("setting up metrics endpoints successful")
+	/////////////////////////
+	// Server info
+	/////////////////////////
+	log.Info().Msg("starting server...")
+	log.Info().Msg("listening api on port " + strconv.Itoa(httpPort))
+	log.Info().Msg("listening metrics on port " + strconv.Itoa(metricsPort))
+	/////////////////////////
+	// Api server start
+	/////////////////////////
 	go func() {
-		// api
 		if err := api_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			//log.Fatalf("listen: %s\n", err)
+			log.Panic().Msg("api listen: " + err.Error())
 		}
 	}()
+	/////////////////////////
+	// Metrics server start
+	/////////////////////////
 	go func() {
-		// metrics
 		if err := metrics_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			//log.Fatalf("listen: %s\n", err)
+			log.Panic().Msg("metrics listen: " + err.Error())
 		}
 	}()
-
+	/////////////////////////
+	// Graceful shutdown
+	/////////////////////////
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	//log.Println("Shutdown Server ...")
+	log.Info().Msg("shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := api_server.Shutdown(ctx); err != nil {
-		//log.Fatal("Server Shutdown:", err)
+		log.Error().Msg("server shutdown: " + err.Error())
 	}
 	select {
 	case <-ctx.Done():
-		//log.Println("timeout of 5 seconds.")
+		log.Info().Msg("timeout of 5 seconds")
 	}
-	//log.Println("Server exiting")
+	log.Info().Msg("server exiting")
 }
 
 func createPostgresConnection() (*gorm.DB, error) {
