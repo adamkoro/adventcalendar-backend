@@ -7,7 +7,9 @@ import (
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
 	custJWT "github.com/adamkoro/adventcalendar-backend/lib/jwt"
 	custModel "github.com/adamkoro/adventcalendar-backend/lib/model"
+	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 )
 
 func AuthRequired(c *gin.Context) {
@@ -28,6 +30,14 @@ func AuthRequired(c *gin.Context) {
 		return
 	}
 	c.Next()
+}
+
+func SetJsonLogger() gin.HandlerFunc {
+	return logger.SetLogger(
+		logger.WithLogger(func(_ *gin.Context, l zerolog.Logger) zerolog.Logger {
+			return l.Output(gin.DefaultWriter).With().Logger()
+		}),
+	)
 }
 
 func CORSMiddleware() gin.HandlerFunc {
