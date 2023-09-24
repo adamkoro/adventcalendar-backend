@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +15,8 @@ import (
 	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -27,26 +28,55 @@ var (
 
 func main() {
 	figure.NewFigure("AdventCalendar Public Api", "big", false).Print()
+	/////////////////////////
+	// Environment variables
+	/////////////////////////
 	httpPort = env.GetHttpPort()
 	metricsPort = env.GetMetricsPort()
+	/////////////////////////
+	// Logger setup
+	/////////////////////////
+	logLevel := env.GetLogLevel()
+	switch logLevel {
+	case "panic":
+		zerolog.SetGlobalLevel(zerolog.PanicLevel)
+	case "fatal":
+		zerolog.SetGlobalLevel(zerolog.FatalLevel)
+	case "error":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	case "info":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	case "debug":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case "warn":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+	/////////////////////////
+	// MongoDb connection check
+	/////////////////////////
 	go func() {
 		var isConnected bool
+		log.Debug().Msg("establishing connection to the mongodb...")
 		mongoDbConn, mongoDbContext, err := createMongoDbConnection()
 		if err != nil {
-			log.Println(err)
+			log.Error().Msg(err.Error())
 		} else {
-			log.Println("Connected to the mongodb.")
+			log.Info().Msg("connected to the mongodb")
 		}
 		db = mdb.NewRepository(mongoDbConn, mongoDbContext)
 		isConnected = true
 		for {
+			log.Debug().Msg("pinging the mongodb...")
 			err := db.PingDb()
 			if err != nil {
-				log.Println("Lost connection to the mongodb, trying to reconnect...")
+				log.Error().Msg(err.Error())
 				isConnected = false
 			} else {
+				log.Debug().Msg("pinging the mongodb successful")
 				if !isConnected {
-					log.Println("Reconnected to the mongodb.")
+					log.Info().Msg("reconnected to the mongodb")
 					isConnected = true
 				}
 			}
@@ -54,13 +84,16 @@ func main() {
 			time.Sleep(5 * time.Second)
 		}
 	}()
+	/////////////////////////
 	// Api server
+	/////////////////////////
 	router := gin.New()
 	router.Use(gin.Recovery())
-	router.Use(gin.Logger())
 	if gin.Mode() == gin.DebugMode {
 		router.Use(endpoints.CORSMiddleware())
 	}
+	router.Use(endpoints.SetJsonLogger())
+	log.Debug().Msg("setting up endpoints...")
 	api := router.Group("/api")
 	{
 		// Public endpoints
@@ -86,9 +119,14 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
+	log.Debug().Msg("setting up endpoints successful")
+	/////////////////////////
 	// Metrics server
+	/////////////////////////
 	metrics := gin.New()
+	metrics.Use(gin.Recovery())
+	metrics.Use(endpoints.SetJsonLogger())
+	log.Debug().Msg("setting up metrics endpoints...")
 	metrics.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	metrics_server := &http.Server{
 		Addr:         ":" + strconv.Itoa(metricsPort),
@@ -96,37 +134,46 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
-	log.Println("Starting server...")
-	log.Println("Listening api on port " + strconv.Itoa(httpPort))
-	log.Println("Listening metrics on port " + strconv.Itoa(metricsPort))
+	log.Debug().Msg("setting up metrics endpoints successful")
+	/////////////////////////
+	// Server info
+	/////////////////////////
+	log.Info().Msg("starting server...")
+	log.Info().Msg("listening api on port " + strconv.Itoa(httpPort))
+	log.Info().Msg("listening metrics on port " + strconv.Itoa(metricsPort))
+	/////////////////////////
+	// Api server start
+	/////////////////////////
 	go func() {
-		// api
 		if err := api_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			log.Panic().Msg("api listen: " + err.Error())
 		}
 	}()
+	/////////////////////////
+	// Metrics server start
+	/////////////////////////
 	go func() {
-		// metrics
 		if err := metrics_server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			log.Panic().Msg("metrics listen: " + err.Error())
 		}
 	}()
-
+	/////////////////////////
+	// Graceful shutdown
+	/////////////////////////
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutdown Server ...")
+	log.Info().Msg("shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := api_server.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown:", err)
+		log.Error().Msg("server shutdown: " + err.Error())
 	}
 	select {
 	case <-ctx.Done():
-		log.Println("timeout of 5 seconds.")
+		log.Info().Msg("timeout of 5 seconds")
 	}
-	log.Println("Server exiting")
+	log.Info().Msg("server exiting")
 }
 
 func createMongoDbConnection() (*mongo.Client, *context.Context, error) {
