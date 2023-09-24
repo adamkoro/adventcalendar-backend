@@ -42,28 +42,24 @@ func main() {
 	/////////////////////////
 	// Postgres connection check
 	/////////////////////////
-	log.Debug().Msg("establishing connection to the postgres...")
-	postgresConn, err := db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
-	if err != nil {
-		log.Error().Msg(err.Error())
-	} else {
-		log.Info().Msg("connected to the postgres")
-	}
-	log.Debug().Msg("establishing connection to the postgres successful")
-	ctx := context.Background()
-	log.Debug().Msg("creating postgres repository...")
-	db := pg.NewRepository(postgresConn, &ctx)
-	log.Debug().Msg("creating postgres repository successful")
-	isConnected = true
 	for {
+		log.Debug().Msg("establishing connection to the postgres...")
+		postgresConn, err := db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
+		if err != nil {
+			log.Error().Msg(err.Error())
+		}
+		ctx := context.Background()
+		db := pg.NewRepository(postgresConn, &ctx)
 		log.Debug().Msg("pinging the postgres...")
-		err := db.Ping()
+		err = db.Ping()
 		if err != nil {
 			log.Info().Msg("lost connection to the postgres, reconnecting...")
 			log.Error().Msg(err.Error())
 			isConnected = false
 		} else {
+			isConnected = true
 			log.Debug().Msg("pinging the postgres successful")
+			log.Debug().Msg("establishing connection to the postgres successful")
 			if !isConnected {
 				log.Info().Msg("reconnected to the postgres")
 				isConnected = true
