@@ -174,6 +174,11 @@ func main() {
 	// Metrics server setup
 	/////////////////////////
 	metrics := gin.New()
+	metrics.Use(gin.Recovery())
+	metrics.Use(logger.SetLogger(
+		logger.WithLogger(func(_ *gin.Context, l zerolog.Logger) zerolog.Logger {
+			return l.Output(gin.DefaultWriter).With().Logger()
+		})))
 	log.Debug().Msg("setting up metrics endpoints...")
 	metrics.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	metrics_server := &http.Server{
