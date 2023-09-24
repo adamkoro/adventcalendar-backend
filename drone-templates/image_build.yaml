@@ -34,8 +34,8 @@ steps:
       TF_VAR_linode_authorized_keys:
         from_secret: linode_authorized_keys
       TF_VAR_linode_label: "{{ .input.componentName }}-build-${DRONE_COMMIT_SHA:0:7}"
-      TF_VAR_linode_type: g6-standard-8
-      TF_VAR_linode_region: it-mil
+      TF_VAR_linode_type: {{ .input.linodeType }}
+      TF_VAR_linode_region: {{ .input.linodeRegion }}
     commands:
       - export $(cat /build_env/linode_root_pass | xargs)
       - cd /build_env/setup
