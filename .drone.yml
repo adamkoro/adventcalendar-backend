@@ -8,23 +8,15 @@ data:
         componentName: admin-api
         dockerfile: admin-api/Dockerfile
     - input:
-<<<<<<< HEAD
+        linodeType: g6-standard-1
+        linodeRegion: it-mil
         componentName: auth-api-init
         dockerfile: auth-api-init/Dockerfile
     - input:
+        linodeType: g6-standard-1
+        linodeRegion: it-mil
         componentName: auth-api
         dockerfile: auth-api/Dockerfile
-=======
-        linodeType: g6-standard-1
-        linodeRegion: it-mil
-        componentName: admin-auth-init
-        dockerfile: admin-auth-init/Dockerfile
-    - input:
-        linodeType: g6-standard-1
-        linodeRegion: it-mil
-        componentName: admin-auth
-        dockerfile: admin-auth/Dockerfile
->>>>>>> 328f8a0 (ci: new variables)
     - input:
         linodeType: g6-standard-1
         linodeRegion: it-mil
