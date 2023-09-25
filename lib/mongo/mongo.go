@@ -76,7 +76,7 @@ func NewRepository(client *mongo.Client, ctx *context.Context) *Repository {
 
 func (r *Repository) Connect(username string, password string, address string, port int) (*mongo.Client, *context.Context, error) {
 	connString := createConnString(username, password, address, port)
-	ctx := context.TODO()
+	ctx := context.Background()
 	client, err := createClient(connString, &ctx)
 	if err != nil {
 		return nil, nil, err
