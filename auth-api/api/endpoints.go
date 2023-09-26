@@ -31,6 +31,7 @@ var (
 func Login(c *gin.Context) {
 	var data pg.LoginRequest
 	log.Debug().Msg("binding request body...")
+	// Bind request body to struct
 	if err := c.ShouldBindJSON(&data); err != nil {
 		log.Error().Msg(err.Error())
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
@@ -38,6 +39,7 @@ func Login(c *gin.Context) {
 	}
 	log.Debug().Msg("binding request body successful")
 	log.Debug().Msg("validating request body...")
+	// Validate request body
 	if validationErr := validate.Struct(&data); validationErr != nil {
 		log.Error().Msg(validationErr.Error())
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
@@ -45,6 +47,7 @@ func Login(c *gin.Context) {
 	}
 	log.Debug().Msg("validating request body successful")
 	log.Debug().Msg("establishing connection to the database..")
+	// Ping database
 	err := Db.Ping()
 	if err != nil {
 		log.Error().Msg(err.Error())
@@ -53,7 +56,8 @@ func Login(c *gin.Context) {
 	}
 	log.Debug().Msg("establishing connection to the database successful")
 	log.Debug().Msg("login user...")
-	err = Db.Login(data.Username, data.Password)
+	// Login user
+	err = Db.Login(&data)
 	if err != nil {
 		log.Error().Msg(err.Error())
 		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Error: "username or password incorrect"})
@@ -61,6 +65,7 @@ func Login(c *gin.Context) {
 	}
 	log.Debug().Msg("login user successful from database")
 	log.Debug().Msg("generating token...")
+	// Generate JWT token
 	token, err := custJWT.GenerateJWT(data.Username, env.GetSecretKey())
 	if err != nil {
 		log.Error().Msg(err.Error())
@@ -69,8 +74,10 @@ func Login(c *gin.Context) {
 	}
 	log.Debug().Msg("generating token successful")
 	log.Debug().Msg("setting cookie...")
+	// Set cookie
 	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
 	log.Debug().Msg("setting cookie successful")
+	// Return response
 	c.JSON(http.StatusOK, model.SuccessResponse{Status: "login successful"})
 	log.Debug().Msg("login successful")
 }

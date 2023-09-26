@@ -78,12 +78,13 @@ func main() {
 			/////////////////////////
 			// Check if admin user exists
 			/////////////////////////
-			isAdminExists, err := db.GetUser(env.GetAdminUsername())
+			log.Debug().Msg("checking admin user exists...")
+			isAdminExists, err := db.GetUser(&pg.UserRequest{Username: env.GetAdminUsername()})
 			if err != nil {
 				log.Info().Msg("admin user does not exists")
 				log.Info().Msg("admin user creating...")
 				// Admin user create
-				err = db.CreateUser(env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
+				err = db.CreateUser(&pg.CreateUserRequest{Username: env.GetAdminUsername(), Email: env.GetAdminEmail(), Password: env.GetAdminPassword()})
 				if err != nil {
 					log.Fatal().Msg(err.Error())
 				}
@@ -96,11 +97,11 @@ func main() {
 			/////////////////////////
 			if isAdminExists.Username != "" {
 				log.Debug().Msg("checking admin user password...")
-				err = db.CheckUserPassword(env.GetAdminUsername(), env.GetAdminPassword())
+				err = db.CheckUserPassword(&pg.LoginRequest{Username: env.GetAdminUsername(), Password: env.GetAdminPassword()})
 				if err != nil {
 					log.Info().Msg("admin user password is not match")
 					log.Info().Msg("admin user password updating...")
-					err = db.UpdateUser(env.GetAdminUsername(), env.GetAdminEmail(), env.GetAdminPassword())
+					err = db.UpdateUser(&pg.UpdateUserRequest{Username: env.GetAdminUsername(), Email: env.GetAdminEmail(), Password: env.GetAdminPassword()})
 					if err != nil {
 						log.Fatal().Msg(err.Error())
 					}
