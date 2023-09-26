@@ -168,7 +168,7 @@ func main() {
 		{
 			admin.GET("/emailmanage/email", endpoints.GetEmails)
 			admin.POST("/emailmanage/email", endpoints.CreateEmail)
-			admin.PUT("/emailmanage/email", nil)
+			admin.PATCH("/emailmanage/email", endpoints.UpdateEmail)
 			admin.DELETE("/emailmanage/email", endpoints.DeleteEmail)
 			admin.POST("/emailmanage/sendemail", endpoints.EmailSend)
 			admin.POST("/emailmanage/customemail", endpoints.CustomEmailSend)

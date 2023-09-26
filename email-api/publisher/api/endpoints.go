@@ -22,6 +22,9 @@ func Ping(c *gin.Context) {
 	c.String(http.StatusOK, "pong")
 }
 
+// ///////////////////////
+// Email send
+// ///////////////////////
 func EmailSend(c *gin.Context) {
 	var rMail db.EmailRequest
 	log.Debug().Msg("binding request body...")
@@ -65,6 +68,9 @@ func EmailSend(c *gin.Context) {
 	c.JSON(http.StatusOK, model.SuccessResponse{Status: "message sent to RabbitMQ."})
 }
 
+// ///////////////////////
+// Custom email send
+// ///////////////////////
 func CustomEmailSend(c *gin.Context) {
 	var message db.MQMessage
 	log.Debug().Msg("binding request body...")
@@ -89,6 +95,9 @@ func CustomEmailSend(c *gin.Context) {
 	c.JSON(http.StatusOK, model.SuccessResponse{Status: "message sent to RabbitMQ."})
 }
 
+// ///////////////////////
+// Get all emails
+// ///////////////////////
 func GetEmails(c *gin.Context) {
 	log.Debug().Msg("establishing connection to the database..")
 	err := Db.Ping()
@@ -108,6 +117,9 @@ func GetEmails(c *gin.Context) {
 	c.JSON(http.StatusOK, emails)
 }
 
+// ///////////////////////
+// Create email
+// ///////////////////////
 func CreateEmail(c *gin.Context) {
 	var email db.Email
 	log.Debug().Msg("binding request body...")
@@ -140,6 +152,44 @@ func CreateEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, model.SuccessResponse{Status: "email created"})
 }
 
+// ///////////////////////
+// Update email
+// ///////////////////////
+func UpdateEmail(c *gin.Context) {
+	var email db.UpdateEmail
+	log.Debug().Msg("binding request body...")
+	if err := c.ShouldBindJSON(&email); err != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
+		return
+	}
+	log.Debug().Msg("binding request body successful")
+	log.Debug().Msg("validating request body...")
+	if validationErr := validate.Struct(&email); validationErr != nil {
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: validationErr.Error()})
+		return
+	}
+	log.Debug().Msg("validating request body successful")
+	log.Debug().Msg("establishing connection to the database..")
+	err := Db.Ping()
+	if err != nil {
+		log.Error().Msg(err.Error())
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "can not establish connection to the database"})
+		return
+	}
+	log.Debug().Msg("establishing connection to the database successful")
+	log.Debug().Msg("updating email in the database...")
+	err = Db.UpdateEmail(&email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "updating email"})
+		return
+	}
+	log.Debug().Msg("updating email in the database successful")
+	c.JSON(http.StatusOK, model.SuccessResponse{Status: "email updated"})
+}
+
+// ///////////////////////
+// Delete email
+// ///////////////////////
 func DeleteEmail(c *gin.Context) {
 	var rMail db.EmailRequest
 	log.Debug().Msg("binding request body...")
