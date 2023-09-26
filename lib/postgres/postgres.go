@@ -43,47 +43,47 @@ func (r *Repository) Close() error {
 	return sqlDB.Close()
 }
 
-func (r *Repository) CreateUser(username string, email string, password string) error {
-	hashpass, err := HashPassword(password)
+func (r *Repository) CreateUser(user *CreateUserRequest) error {
+	hashpass, err := HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
-	return r.Db.Create(&User{Username: username, Email: email, Password: hashpass}).Error
+	return r.Db.Create(&User{Username: user.Username, Email: user.Email, Password: hashpass}).Error
 }
 
-func (r *Repository) GetUser(username string) (*User, error) {
-	user := &User{}
-	err := r.Db.WithContext(*r.Ctx).Where("username = ?", username).First(user).Error
-	return user, err
+func (r *Repository) GetUser(user *UserRequest) (*User, error) {
+	dbUser := &User{}
+	err := r.Db.WithContext(*r.Ctx).Where("username = ?", user.Username).First(dbUser).Error
+	return dbUser, err
 }
 
-func (r *Repository) Login(username string, password string) error {
-	user := &User{}
-	err := r.Db.WithContext(*r.Ctx).Where("username = ?", username).First(user).Error
+func (r *Repository) Login(user *LoginRequest) error {
+	dbUser := &User{}
+	err := r.Db.WithContext(*r.Ctx).Where("username = ?", user.Username).First(dbUser).Error
 	if err != nil {
 		return err
 	}
-	err = CheckPasswordHash(password, user.Password)
+	err = CheckPasswordHash(user.Password, dbUser.Password)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *Repository) DeleteUser(username string) error {
-	return r.Db.WithContext(*r.Ctx).Where("username = ?", username).Delete(&User{}).Error
+func (r *Repository) DeleteUser(user *DeleteUserRequest) error {
+	return r.Db.WithContext(*r.Ctx).Where("username = ?", user.Username).Delete(&User{}).Error
 }
 
-func (r *Repository) UpdateUser(username, email, password string) error {
+func (r *Repository) UpdateUser(user *UpdateUserRequest) error {
 	var hashpass string
 	var err error
-	if password != "" {
-		hashpass, err = HashPassword(password)
+	if user.Password != "" {
+		hashpass, err = HashPassword(user.Password)
 		if err != nil {
 			return err
 		}
 	}
-	return r.Db.WithContext(*r.Ctx).Model(&User{}).Where("username = ?", username).Updates(User{Email: email, Password: hashpass}).Error
+	return r.Db.WithContext(*r.Ctx).Model(&User{}).Where("username = ?", user.Username).Updates(User{Email: user.Email, Password: hashpass}).Error
 }
 
 func (r *Repository) GetAllUsers() ([]User, error) {
@@ -100,13 +100,13 @@ func (r *Repository) Ping() error {
 	return sqlDB.Ping()
 }
 
-func (r *Repository) CheckUserPassword(username string, password string) error {
-	user := &User{}
-	err := r.Db.WithContext(*r.Ctx).Where("username = ?", username).First(user).Error
+func (r *Repository) CheckUserPassword(user *LoginRequest) error {
+	dbUser := &User{}
+	err := r.Db.WithContext(*r.Ctx).Where("username = ?", user.Username).First(dbUser).Error
 	if err != nil {
 		return err
 	}
-	err = CheckPasswordHash(password, user.Password)
+	err = CheckPasswordHash(user.Password, dbUser.Password)
 	if err != nil {
 		return err
 	}
