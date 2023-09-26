@@ -40,7 +40,7 @@ func CreateUser(c *gin.Context) {
 	}
 	log.Debug().Msg("establishing connection to the database successful")
 	log.Debug().Msg("creating user...")
-	err = Db.CreateUser(data.Username, data.Email, data.Password)
+	err = Db.CreateUser(&data)
 	if err != nil {
 		log.Error().Msg(err.Error())
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "while creating user"})
@@ -76,7 +76,7 @@ func GetUser(c *gin.Context) {
 	}
 	log.Debug().Msg("establishing connection to the database successful")
 	log.Debug().Msg("getting user...")
-	user, err := Db.GetUser(data.Username)
+	user, err := Db.GetUser(&data)
 	if err != nil {
 		log.Error().Msg(err.Error())
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "while getting requested user"})
@@ -147,7 +147,7 @@ func UpdateUser(c *gin.Context) {
 	}
 	log.Debug().Msg("establishing connection to the database successful")
 	log.Debug().Msg("updating user...")
-	err = Db.UpdateUser(data.Username, data.Email, data.Password)
+	err = Db.UpdateUser(&data)
 	if err != nil {
 		log.Error().Msg(err.Error())
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "while updating user"})
@@ -158,7 +158,7 @@ func UpdateUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-	var data pg.UserRequest
+	var data pg.DeleteUserRequest
 	log.Debug().Msg("binding request body...")
 	if err := c.ShouldBindJSON(&data); err != nil {
 		log.Error().Msg(err.Error())
@@ -189,7 +189,7 @@ func DeleteUser(c *gin.Context) {
 	}
 	log.Debug().Msg("user is not admin")
 	log.Debug().Msg("deleting user...")
-	err = Db.DeleteUser(data.Username)
+	err = Db.DeleteUser(&data)
 	if err != nil {
 		log.Error().Msg(err.Error())
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "while deleting user"})
