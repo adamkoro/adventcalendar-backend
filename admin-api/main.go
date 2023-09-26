@@ -108,7 +108,7 @@ func main() {
 			// Single user
 			admin.GET("/usermanage/user", endpoints.GetUser)
 			admin.POST("/usermanage/user", endpoints.CreateUser)
-			admin.PUT("/usermanage/user", endpoints.UpdateUser)
+			admin.PATCH("/usermanage/user", endpoints.UpdateUser)
 			admin.DELETE("/usermanage/user", endpoints.DeleteUser)
 			// All users
 			admin.GET("/usermanage/users", endpoints.GetAllUsers)
