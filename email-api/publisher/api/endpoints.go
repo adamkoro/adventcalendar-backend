@@ -50,7 +50,7 @@ func EmailSend(c *gin.Context) {
 	}
 	log.Debug().Msg("establishing connection to the database successful")
 	log.Debug().Msg("getting email from the database...")
-	mail, err := Db.GetEmailByName(rMail.Name)
+	mail, err := Db.GetEmailByName(&rMail)
 	if err != nil {
 		log.Error().Msg(err.Error())
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid email name"})
@@ -156,7 +156,7 @@ func CreateEmail(c *gin.Context) {
 // Update email
 // ///////////////////////
 func UpdateEmail(c *gin.Context) {
-	var email db.UpdateEmail
+	var email db.UpdateEmailRequest
 	log.Debug().Msg("binding request body...")
 	if err := c.ShouldBindJSON(&email); err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
@@ -191,7 +191,7 @@ func UpdateEmail(c *gin.Context) {
 // Delete email
 // ///////////////////////
 func DeleteEmail(c *gin.Context) {
-	var rMail db.EmailRequest
+	var rMail db.DeleteEmailRequest
 	log.Debug().Msg("binding request body...")
 	if err := c.ShouldBindJSON(&rMail); err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Error: "invalid request body"})
@@ -219,7 +219,7 @@ func DeleteEmail(c *gin.Context) {
 	}
 	log.Debug().Msg("establishing connection to the database successful")
 	log.Debug().Msg("deleting email from the database...")
-	err = Db.DeleteEmailByName(rMail.Name)
+	err = Db.DeleteEmailByName(&rMail)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Error: "deleting email"})
 		return

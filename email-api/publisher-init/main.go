@@ -80,7 +80,7 @@ func main() {
 			// Check if default email exists if not create it
 			/////////////////////////
 			log.Debug().Msg("checking if default email exists...")
-			_, err = db.GetEmailByName("default")
+			_, err = db.GetEmailByName(&md.EmailRequest{Name: "default"})
 			if err != nil {
 				log.Info().Msg("default email does not exist")
 				log.Info().Msg("creating default email...")

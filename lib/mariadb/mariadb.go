@@ -42,17 +42,17 @@ func (r *Repository) GetAllEmails() ([]Email, error) {
 	return emails, err
 }
 
-func (r *Repository) DeleteEmailByName(name string) error {
-	return r.Db.WithContext(*r.Ctx).Where("name = ?", name).Delete(&Email{}).Error
+func (r *Repository) DeleteEmailByName(email *DeleteEmailRequest) error {
+	return r.Db.WithContext(*r.Ctx).Where("name = ?", email.Name).Delete(&Email{}).Error
 }
 
-func (r *Repository) GetEmailByName(name string) (*Email, error) {
-	email := &Email{}
-	err := r.Db.WithContext(*r.Ctx).Where("name = ?", name).First(email).Error
-	return email, err
+func (r *Repository) GetEmailByName(email *EmailRequest) (*Email, error) {
+	dbEmail := &Email{}
+	err := r.Db.WithContext(*r.Ctx).Where("name = ?", email.Name).First(dbEmail).Error
+	return dbEmail, err
 }
 
-func (r *Repository) UpdateEmail(email *UpdateEmail) error {
+func (r *Repository) UpdateEmail(email *UpdateEmailRequest) error {
 	return r.Db.WithContext(*r.Ctx).Model(&Email{}).Where("`key` = ?", email.Key).Updates(Email{
 		Name:    email.Name,
 		From:    email.From,
