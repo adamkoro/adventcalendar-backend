@@ -2,6 +2,7 @@ package env_test
 
 import (
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/adamkoro/adventcalendar-backend/lib/env"
@@ -13,6 +14,54 @@ func TestGetLogLevel(t *testing.T) {
 
 	expected := "debug"
 	actual := env.GetLogLevel()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetSecretKey(t *testing.T) {
+	os.Setenv("SECRET_KEY", "dsadsadasdasdasadsasdaassda")
+	defer os.Unsetenv("SECRET_KEY")
+
+	expected := "dsadsadasdasdasadsasdaassda"
+	actual := env.GetSecretKey()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetAdminUsername(t *testing.T) {
+	os.Setenv("ADMIN_USERNAME", "admin")
+	defer os.Unsetenv("ADMIN_USERNAME")
+
+	expected := "admin"
+	actual := env.GetAdminUsername()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetAdminEmail(t *testing.T) {
+	os.Setenv("ADMIN_EMAIL", "admin@test.local")
+	defer os.Unsetenv("ADMIN_EMAIL")
+
+	expected := "admin@test.local"
+	actual := env.GetAdminEmail()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetAdminPassword(t *testing.T) {
+	os.Setenv("ADMIN_PASSWORD", "admin")
+	defer os.Unsetenv("ADMIN_PASSWORD")
+
+	expected := "admin"
+	actual := env.GetAdminPassword()
 
 	if actual != expected {
 		t.Errorf("expected %s, got %s", expected, actual)
@@ -187,7 +236,7 @@ func TestGetRabbitmqPort(t *testing.T) {
 	}
 }
 
-func TesGetRabbitmqUser(t *testing.T) {
+func TestGetRabbitmqUser(t *testing.T) {
 	os.Setenv("RABBITMQ_USER", "guest")
 	defer os.Unsetenv("RABBITMQ_USER")
 
@@ -217,6 +266,78 @@ func TestGetRabbitmqVhost(t *testing.T) {
 
 	expected := "/"
 	actual := env.GetRabbitmqVhost()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetSmtpAuth(t *testing.T) {
+	os.Setenv("SMTP_AUTH", "true")
+	defer os.Unsetenv("SMTP_AUTH")
+
+	expected := true
+	actual := env.GetSmtpAuth()
+
+	if actual != expected {
+		t.Errorf("expected %t, got %t", expected, actual)
+	}
+}
+
+func TestGetSmtpHost(t *testing.T) {
+	os.Setenv("SMTP_HOST", "localhost")
+	defer os.Unsetenv("SMTP_HOST")
+
+	expected := "localhost"
+	actual := env.GetSmtpHost()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetSmtpPort(t *testing.T) {
+	os.Setenv("SMTP_PORT", "25")
+	defer os.Unsetenv("SMTP_PORT")
+
+	expected := 25
+	actual := env.GetSmtpPort()
+
+	if actual != strconv.Itoa(expected) {
+		t.Errorf("expected %d, got %s", expected, actual)
+	}
+}
+
+func TestGetSmtpUser(t *testing.T) {
+	os.Setenv("SMTP_USER", "user")
+	defer os.Unsetenv("SMTP_USER")
+
+	expected := "user"
+	actual := env.GetSmtpUser()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetSmtpPassword(t *testing.T) {
+	os.Setenv("SMTP_PASSWORD", "password")
+	defer os.Unsetenv("SMTP_PASSWORD")
+
+	expected := "password"
+	actual := env.GetSmtpPassword()
+
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
+	}
+}
+
+func TestGetSmtpFrom(t *testing.T) {
+	os.Setenv("SMTP_FROM", "test@localhost")
+	defer os.Unsetenv("SMTP_FROM")
+
+	expected := "test@localhost"
+	actual := env.GetSmtpFrom()
 
 	if actual != expected {
 		t.Errorf("expected %s, got %s", expected, actual)
