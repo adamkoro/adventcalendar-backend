@@ -52,8 +52,14 @@ func (r *Repository) GetEmailByName(name string) (*Email, error) {
 	return email, err
 }
 
-func (r *Repository) UpdateEmail(key uint, email *Email) error {
-	return r.Db.WithContext(*r.Ctx).Model(&Email{}).Where("key = ?", key).Updates(email).Error
+func (r *Repository) UpdateEmail(email *UpdateEmail) error {
+	return r.Db.WithContext(*r.Ctx).Model(&Email{}).Where("`key` = ?", email.Key).Updates(Email{
+		Name:    email.Name,
+		From:    email.From,
+		To:      email.To,
+		Subject: email.Subject,
+		Body:    email.Body,
+	}).Error
 }
 
 func (r *Repository) Ping() error {
