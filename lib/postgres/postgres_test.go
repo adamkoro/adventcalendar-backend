@@ -1,6 +1,7 @@
 package postgres_test
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"os"
@@ -33,7 +34,8 @@ func TestMain(m *testing.M) {
 		log.Fatalf("can't open gorm connection: %s", err)
 	}
 	// Create a new repository with the GORM database
-	repo = pg.NewRepository(gormDB)
+	ctx := context.Background()
+	repo = pg.NewRepository(gormDB, &ctx)
 	if repo == nil {
 		log.Fatal("repository is nil")
 	}
@@ -73,6 +75,16 @@ func TestCreateUser(t *testing.T) {
 	mock.ExpectQuery("^INSERT INTO (.+)").WithArgs("test", "test@test.test", sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"key"}).AddRow(1))
 	mock.ExpectCommit()
 	err = repo.CreateUser("test", "test@test.test", "test")
+	assert.NoError(t, err)
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestLogin(t *testing.T) {
+	createdAt, _ := time.Parse(time.RFC3339, "0001-01-01 00:00:00 +0000 UTC")
+	mock.ExpectQuery("^SELECT (.+) FROM (.+)").WithArgs("test").WillReturnRows(sqlmock.NewRows([]string{"key", "username", "email", "password", "created_at", "modified_at"}).AddRow(1, "test", "test@test.test", "hashed_password", createdAt, createdAt))
+	err = repo.Login("test", "test")
 	assert.NoError(t, err)
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %s", err)
