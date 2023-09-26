@@ -24,7 +24,7 @@ type CreateUserRequest struct {
 
 type UpdateUserRequest struct {
 	Username string `json:"username" binding:"required" validate:"required,min=1,max=32"`
-	Email    string `json:"email" binding:"required" validate:"required,min=1,max=255"`
+	Email    string `json:"email" validate:"required,min=1,max=255"`
 	Password string `json:"password"`
 }
 
