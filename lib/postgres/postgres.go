@@ -75,16 +75,13 @@ func (r *Repository) DeleteUser(username string) error {
 }
 
 func (r *Repository) UpdateUser(username, email, password string) error {
-	hashpass, err := HashPassword(password)
-	if err != nil {
-		return err
-	}
-
-	if email == "" {
-		return r.Db.WithContext(*r.Ctx).Model(&User{}).Where("username = ?", username).Updates(User{Password: hashpass}).Error
-	}
-	if password == "" {
-		return r.Db.WithContext(*r.Ctx).Model(&User{}).Where("username = ?", username).Updates(User{Email: email}).Error
+	var hashpass string
+	var err error
+	if password != "" {
+		hashpass, err = HashPassword(password)
+		if err != nil {
+			return err
+		}
 	}
 	return r.Db.WithContext(*r.Ctx).Model(&User{}).Where("username = ?", username).Updates(User{Email: email, Password: hashpass}).Error
 }
