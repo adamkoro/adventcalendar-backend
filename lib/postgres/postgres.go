@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"encoding/base64"
 	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
@@ -14,8 +15,8 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func CheckPasswordHash(password, hash string) error {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+func CheckPasswordHash(hash, password []byte) error {
+	err := bcrypt.CompareHashAndPassword(hash, password)
 	return err
 }
 
@@ -63,7 +64,11 @@ func (r *Repository) Login(user *LoginRequest) error {
 	if err != nil {
 		return err
 	}
-	err = CheckPasswordHash(user.Password, dbUser.Password)
+	convertedPassword, err := base64.StdEncoding.DecodeString(user.Password)
+	if err != nil {
+		return err
+	}
+	err = CheckPasswordHash([]byte(dbUser.Password), convertedPassword)
 	if err != nil {
 		return err
 	}
@@ -100,7 +105,7 @@ func (r *Repository) Ping() error {
 	return sqlDB.Ping()
 }
 
-func (r *Repository) CheckUserPassword(user *LoginRequest) error {
+/*func (r *Repository) CheckUserPassword(user *LoginRequest) error {
 	dbUser := &User{}
 	err := r.Db.WithContext(*r.Ctx).Where("username = ?", user.Username).First(dbUser).Error
 	if err != nil {
@@ -111,4 +116,4 @@ func (r *Repository) CheckUserPassword(user *LoginRequest) error {
 		return err
 	}
 	return nil
-}
+}*/
