@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  admin-api
+spec:
+  selector:
+    app:  admin-api
+  ports:
+  - name:  http-api
+    port:  80
+    targetPort:  http-api
+  - name:  http-metrics
+    port:  81
+    targetPort:  http-metrics
