@@ -10,17 +10,17 @@ import (
 type AdventCalendarDay struct {
 	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Day     uint8              `bson:"day" json:"day" binding:"required" validate:"required,min=1,max=31"`
-	Year    uint16             `bson:"year" json:"year" binding:"required" validate:"required,min=1,max=9999"`
+	Year    uint16             `bson:"year" json:"year" binding:"required" validate:"required,min=1900,max=9999"`
 	Title   string             `bson:"title" json:"title" binding:"required" validate:"required,min=1,max=255"`
 	Content string             `bson:"content" json:"content" binding:"required" validate:"required,min=1,max=65555"`
 }
 
 type AdventCalendarDayUpdate struct {
-	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id" binding:"required" validate:"required"`
-	Day     uint8              `bson:"day" json:"day" binding:"required" validate:"required,min=1,max=31"`
-	Year    uint16             `bson:"year" json:"year" binding:"required" validate:"required,min=1,max=9999"`
-	Title   string             `bson:"title" json:"title" binding:"required" validate:"required,min=1,max=255"`
-	Content string             `bson:"content" json:"content" binding:"required" validate:"required,min=1,max=65555"`
+	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Day     uint8              `bson:"day" json:"day"`
+	Year    uint16             `bson:"year" json:"year"`
+	Title   string             `bson:"title" json:"title"`
+	Content string             `bson:"content" json:"content"`
 }
 
 type DayIDRequest struct {
