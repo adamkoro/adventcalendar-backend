@@ -1,10 +1,10 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: auth-api
+  name: public-api
 spec:
   selector:
-    app: auth-api
+    app: public-api
   ports:
     - name: api
       port: 80

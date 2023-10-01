@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-api
+  name: email-consumer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth-api
+      app: email-consumer
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -15,13 +15,13 @@ spec:
   template:
     metadata:
       labels:
-        app: auth-api
+        app: email-consumer
     spec:
       restartPolicy: Always
       containers:
-        - image: registry.adamkoro.com/adventcalendar/backend/auth-api:latest
+        - image: registry.adamkoro.com/adventcalendar/backend/email-consumer:latest
           imagePullPolicy: Always
-          name: auth-api
+          name: email-consumer
           resources:
             requests:
               cpu: "300m"
@@ -51,41 +51,25 @@ spec:
           env:
             - name: LOG_LEVEL
               value: "info"
-            - name: SECRET_KEY
+            - name: RABBITMQ_HOST
+              value: "rabbitmq"
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
               valueFrom:
                 secretKeyRef:
-                  name: backend-secret-key
-                  key: SECRET_KEY
-            - name: DB_USER
+                  name: rabbitmq-config
+                  key: RABBITMQ_DEFAULT_USER
+            - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_USER
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_PASSWORD
-            - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_HOST
-            - name: DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_PORT
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_NAME
-            - name: DB_SSL_MODE
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_SSL_MODE
+                  name: rabbitmq-config
+                  key: RABBITMQ_DEFAULT_PASS
+            - name: RABBITMQ_VHOST
+              value: "/"
+          envFrom:
+            - secretRef:
+                name: smtp-config
           securityContext:
             readOnlyRootFilesystem: true
             runAsNonRoot: true

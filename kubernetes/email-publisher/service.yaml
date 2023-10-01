@@ -1,12 +1,12 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: auth-api
+  name: email-publisher
 spec:
   selector:
-    app: auth-api
+    app: email-publisher
   ports:
-    - name: api
+    - name: http
       port: 80
       targetPort: http-api
     - name: metrics

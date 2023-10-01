@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-api
+  name: public-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth-api
+      app: public-api
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -15,13 +15,13 @@ spec:
   template:
     metadata:
       labels:
-        app: auth-api
+        app: public-api
     spec:
       restartPolicy: Always
       containers:
-        - image: registry.adamkoro.com/adventcalendar/backend/auth-api:latest
+        - image: registry.adamkoro.com/adventcalendar/backend/public-api:latest
           imagePullPolicy: Always
-          name: auth-api
+          name: public-api
           resources:
             requests:
               cpu: "300m"
@@ -59,33 +59,22 @@ spec:
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_USER
+                  name: mongo-config
+                  key: MONGO_INITDB_ROOT_USERNAME
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_PASSWORD
+                  name: mongo-config
+                  key: MONGO_INITDB_ROOT_PASSWORD
             - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_HOST
+              value: "mongo"
             - name: DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_PORT
+              value: "27017"
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_NAME
-            - name: DB_SSL_MODE
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-database-auth
-                  key: DB_SSL_MODE
+                  name: mongo-config
+                  key: MONGO_INITDB_DATABASE
           securityContext:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
