@@ -18,15 +18,6 @@ spec:
         app:  auth-api
     spec:
       restartPolicy: Always
-      initContainers:
-        - name: init-db
-          image: registry.adamkoro.com/adventcalendar/backend/auth-api-init:latest
-          imagePullPolicy: Always
-          envFrom:
-            - secretRef:
-                name: postgres-database-auth
-            - secretRef:
-                name: admin-user-auth
       containers:
       - image:  registry.adamkoro.com/adventcalendar/backend/auth-api:latest
         imagePullPolicy: Always
