@@ -105,15 +105,15 @@ func (r *Repository) Ping() error {
 	return sqlDB.Ping()
 }
 
-/*func (r *Repository) CheckUserPassword(user *LoginRequest) error {
+func (r *Repository) CheckUserPassword(user *LoginRequest) error {
 	dbUser := &User{}
 	err := r.Db.WithContext(*r.Ctx).Where("username = ?", user.Username).First(dbUser).Error
 	if err != nil {
 		return err
 	}
-	err = CheckPasswordHash(user.Password, dbUser.Password)
+	err = CheckPasswordHash([]byte(user.Password), []byte(dbUser.Password))
 	if err != nil {
 		return err
 	}
 	return nil
-}*/
+}
