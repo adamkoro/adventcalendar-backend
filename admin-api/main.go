@@ -180,7 +180,3 @@ func main() {
 func createPostgresConnection() (*gorm.DB, error) {
 	return db.Connect(env.GetDbHost(), env.GetDbUser(), env.GetDbPassword(), env.GetDbName(), env.GetDbPort(), env.GetDbSslMode())
 }
-
-/*func createRedisConnection() *redis.Client {
-	return rd.Connect(env.GetRedisHost(), env.GetRedisPort(), env.GetRedisPassword(), env.GetRedisDb())
-}*/
