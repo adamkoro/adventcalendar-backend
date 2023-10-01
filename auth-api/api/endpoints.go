@@ -75,7 +75,7 @@ func Login(c *gin.Context) {
 	log.Debug().Msg("generating token successful")
 	log.Debug().Msg("setting cookie...")
 	// Set cookie
-	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
+	c.SetCookie("token", token, 86400, "/", "*", false, true)
 	log.Debug().Msg("setting cookie successful")
 	// Return response
 	c.JSON(http.StatusOK, model.SuccessResponse{Status: "login successful"})
@@ -107,7 +107,7 @@ func Logout(c *gin.Context) {
 	}
 	log.Debug().Msg("validating token successful")
 	log.Debug().Msg("deleting cookie")
-	c.SetCookie("token", "", 0, "/", "localhost", false, true)
+	c.SetCookie("token", "", 0, "/", "*", false, true)
 	log.Debug().Msg("deleting cookie successful")
 	c.JSON(http.StatusOK, model.SuccessResponse{Status: "logout successful"})
 	log.Debug().Msg("logout successful")
