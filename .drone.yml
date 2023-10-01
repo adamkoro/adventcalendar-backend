@@ -10,8 +10,8 @@ data:
     - input:
         linodeType: g6-standard-1
         linodeRegion: it-mil
-        componentName: auth-api-init
-        dockerfile: auth-api-init/Dockerfile
+        componentName: admin-api-init
+        dockerfile: admin-api-init/Dockerfile
     - input:
         linodeType: g6-standard-1
         linodeRegion: it-mil
