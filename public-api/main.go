@@ -104,7 +104,7 @@ func main() {
 		{
 			admin.GET("/public/dbs", endpoints.GetAllDatabase)
 			admin.POST("/public/day", endpoints.CreateDay)
-			admin.PUT("/public/day", endpoints.UpdateDay)
+			admin.PATCH("/public/day", endpoints.UpdateDay)
 			admin.DELETE("/public/day", endpoints.DeleteDay)
 		}
 		public := api.Group("/public")
