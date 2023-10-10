@@ -6,7 +6,7 @@ spec:
   selector:
     app: public-api
   ports:
-    - name: api
+    - name: http
       port: 80
       targetPort: http-api
     - name: metrics
